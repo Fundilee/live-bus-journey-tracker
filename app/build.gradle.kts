@@ -2,6 +2,8 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
+    alias(libs.plugins.kotlin.serialization)
+
 }
 
 android {
@@ -19,13 +21,24 @@ android {
     }
 
     buildTypes {
+        debug {
+            buildConfigField("String", "TFL_API_KEY", "\"${project.findProperty("TFL_API_KEY") ?: ""}\"")
+            buildConfigField("String", "BASE_URL", "\"https://api.tfl.gov.uk/\"")
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            buildConfigField("String", "TFL_API_KEY", "\"${project.findProperty("TFL_API_KEY") ?: ""}\"")
+            buildConfigField("String", "BASE_URL", "\"https://api.tfl.gov.uk/\"")
         }
+    }
+    
+    buildFeatures {
+        compose = true
+        buildConfig = true
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -58,6 +71,9 @@ dependencies {
     implementation(libs.androidx.compose.material3)
 
     implementation(libs.androidx.navigation.compose)
+
+    // Serialization
+    implementation(libs.kotlinx.serialization.json)
 
     // Dependency Injection
     implementation(libs.koin.android)

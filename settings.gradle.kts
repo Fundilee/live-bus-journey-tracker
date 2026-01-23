@@ -33,6 +33,8 @@ include(":core:database")
 
 // Feature modules
 include(":feature:busroutes")
+include(":feature:busroutes:domain")
+include(":feature:busroutes:data")
 include(":feature:tracking")
 include(":feature:home")
  
