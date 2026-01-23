@@ -7,11 +7,9 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.livebusjourneytracker.feature.busroutes.BusRoutesScreen
+import androidx.navigation.compose.rememberNavController
+import com.livebusjourneytracker.navigation.MainNavGraph
 import com.livebusjourneytracker.ui.theme.LiveBusJourneyTrackerTheme
 
 class MainActivity : ComponentActivity() {
@@ -20,26 +18,11 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             LiveBusJourneyTrackerTheme {
+                val navController = rememberNavController()
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    BusRoutesScreen(modifier = Modifier.padding(innerPadding))
+                    MainNavGraph(navController, Modifier.padding(innerPadding))
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    LiveBusJourneyTrackerTheme {
-        Greeting("Android")
     }
 }
