@@ -2,6 +2,7 @@ package com.livebusjourneytracker.core.network
 
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -15,8 +16,13 @@ val networkModule = module {
         }
     }
     
+    single<ApiKeyInterceptor> {
+        ApiKeyInterceptor(get(qualifier = named("apiKey")))
+    }
+    
     single<OkHttpClient> {
         OkHttpClient.Builder()
+            .addInterceptor(get<ApiKeyInterceptor>())
             .addInterceptor(get<HttpLoggingInterceptor>())
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
@@ -26,8 +32,8 @@ val networkModule = module {
     
     single<Retrofit> {
         Retrofit.Builder()
-            .baseUrl("https://api.tfl.gov.uk/")
-            .client(get())
+            .baseUrl(get<String>(qualifier = named("baseUrl")))
+            .client(get<OkHttpClient>())
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }

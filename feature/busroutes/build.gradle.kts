@@ -43,6 +43,8 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:network"))
     implementation(project(":core:database"))
+    implementation(project(":feature:busroutes:domain"))
+    implementation(project(":feature:busroutes:data"))
     
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -52,6 +54,12 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.koin.android)
+    implementation(libs.koin.androidx.compose)
+    implementation(libs.google.maps.android)
+    implementation(libs.google.maps.compose)
+    implementation(libs.google.play.services.location)
     
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

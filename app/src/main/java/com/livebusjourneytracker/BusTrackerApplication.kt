@@ -3,6 +3,7 @@ package com.livebusjourneytracker
 import android.app.Application
 import com.livebusjourneytracker.common.di.commonModule
 import com.livebusjourneytracker.core.network.networkModule
+import com.livebusjourneytracker.di.appModule
 import com.livebusjourneytracker.feature.busroutes.di.busRoutesModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
@@ -17,6 +18,7 @@ class BusTrackerApplication : Application() {
             androidLogger()
             androidContext(this@BusTrackerApplication)
             modules(
+                appModule,
                 commonModule,
                 networkModule,
                 busRoutesModule
