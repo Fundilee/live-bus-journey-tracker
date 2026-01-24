@@ -43,8 +43,8 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:network"))
     implementation(project(":core:database"))
-    implementation(project(":feature:busroutes:domain"))
-    implementation(project(":feature:busroutes:data"))
+    implementation(project(":core:domain"))
+    implementation(project(":core:data"))
     
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

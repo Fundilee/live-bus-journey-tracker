@@ -30,11 +30,11 @@ include(":core:common")
 include(":core:ui")
 include(":core:network")
 include(":core:database")
+include(":core:domain")
+include(":core:data")
 
 // Feature modules
 include(":feature:busroutes")
-include(":feature:busroutes:domain")
-include(":feature:busroutes:data")
 include(":feature:tracking")
 include(":feature:home")
- 
+include(":feature:tracking:lib")
