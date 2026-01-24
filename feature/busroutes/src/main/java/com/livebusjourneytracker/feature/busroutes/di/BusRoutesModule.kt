@@ -1,12 +1,13 @@
 package com.livebusjourneytracker.feature.busroutes.di
 
 import com.livebusjourneytracker.feature.busroutes.BusRoutesViewModel
-import com.livebusjourneytracker.feature.busroutes.data.api.TflApiService
-import com.livebusjourneytracker.feature.busroutes.data.repository.BusRoutesRepositoryImpl
-import com.livebusjourneytracker.feature.busroutes.domain.repository.BusRoutesRepository
-import com.livebusjourneytracker.feature.busroutes.domain.usecase.GetBusRoutesUseCase
-import com.livebusjourneytracker.feature.busroutes.domain.usecase.GetNearbyStopsUseCase
-import com.livebusjourneytracker.feature.busroutes.domain.usecase.SearchBusRoutesUseCase
+import com.livebusjourneytracker.core.data.api.TflApiService
+import com.livebusjourneytracker.core.data.repository.BusRoutesRepositoryImpl
+import com.livebusjourneytracker.core.domain.repository.BusRoutesRepository
+import com.livebusjourneytracker.core.domain.usecase.GetBusRoutesUseCase
+import com.livebusjourneytracker.core.domain.usecase.GetJourneyResultsUseCase
+import com.livebusjourneytracker.core.domain.usecase.GetNearbyStopsUseCase
+import com.livebusjourneytracker.core.domain.usecase.SearchBusRoutesUseCase
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.bind
@@ -26,7 +27,8 @@ val busRoutesModule = module {
     singleOf(::GetBusRoutesUseCase)
     singleOf(::SearchBusRoutesUseCase)
     singleOf(::GetNearbyStopsUseCase)
-    
+    singleOf(::GetJourneyResultsUseCase)
+
     // ViewModel
     viewModelOf(::BusRoutesViewModel)
 }

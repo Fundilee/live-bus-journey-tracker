@@ -40,6 +40,7 @@ android {
 dependencies {
     implementation(project(":common"))
     implementation(project(":core:common"))
+    implementation(project(":core:domain"))
     
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
