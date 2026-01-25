@@ -1,6 +1,9 @@
 package com.livebusjourneytracker.core.data.dto
 
 import com.google.gson.annotations.SerializedName
+import com.livebusjourneytracker.core.domain.model.Mode
+import com.livebusjourneytracker.core.domain.model.Place
+import com.livebusjourneytracker.core.domain.model.RouteOption
 
 data class JourneyResponseDto(
     @SerializedName("\$type")
@@ -10,7 +13,8 @@ data class JourneyResponseDto(
     val viaLocationDisambiguation: DisambiguationDto?,
     val recommendedMaxAgeMinutes: Int?,
     val searchCriteria: SearchCriteriaDto?,
-    val journeyVector: JourneyVectorDto?
+    val journeyVector: JourneyVectorDto?,
+    val journey: JourneyDto?
 )
 
 data class DisambiguationDto(
@@ -28,6 +32,36 @@ data class DisambiguationOptionDto(
     val place: PlaceDto,
     val matchQuality: Int
 )
+
+data class JourneyDto (
+    val startDateTime: String,
+    val arrivalDateTime: String,
+    val duration: Int,
+    val legs: List<LegDto>
+
+)
+
+data class LegDto(
+    val duration: Int,
+    val departureTime: String,
+    val arrivalTime: String,
+    val departurePoint: Place,
+    val arrivalPoint: Place,
+    val mode: ModeDto,
+    val routeOption: RouteOptionDto,
+    val lineId: String? = null
+)
+
+data class ModeDto(
+    val id: String,
+    val name: String
+)
+
+data class RouteOptionDto(
+    val name: String,
+)
+
+
 
 data class PlaceDto(
     @SerializedName("\$type")

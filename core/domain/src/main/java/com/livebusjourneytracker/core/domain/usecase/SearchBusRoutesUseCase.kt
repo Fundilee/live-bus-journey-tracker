@@ -8,10 +8,6 @@ class SearchBusRoutesUseCase(
     private val repository: BusRoutesRepository
 ) {
     suspend operator fun invoke(query: String): Flow<List<BusRoute>> {
-        return if (query.isBlank()) {
-            repository.getAllBusRoutes()
-        } else {
-            repository.searchBusRoutes(query.trim())
-        }
+        return repository.searchBusRoutes(query.trim())
     }
 }

@@ -1,12 +1,13 @@
 package com.livebusjourneytracker.core.domain.model
 
-data class Journey(
+data class BusJourney(
     val toLocationDisambiguation: Disambiguation?,
     val fromLocationDisambiguation: Disambiguation?,
     val viaLocationDisambiguation: Disambiguation?,
     val recommendedMaxAgeMinutes: Int?,
     val searchCriteria: SearchCriteria?,
-    val journeyVector: JourneyVector?
+    val journeyVector: JourneyVector?,
+    val journey: Journey?,
 )
 
 data class Disambiguation(
@@ -19,6 +20,34 @@ data class DisambiguationOption(
     val uri: String,
     val place: Place,
     val matchQuality: Int
+)
+
+data class Journey (
+    val startDateTime: String,
+    val arrivalDateTime: String,
+    val duration: Int,
+    val legs: List<Leg> = emptyList()
+
+)
+
+data class Leg(
+    val duration: Int,
+    val departureTime: String,
+    val arrivalTime: String,
+    val departurePoint: Place,
+    val arrivalPoint: Place,
+    val mode: Mode,
+    val routeOption: RouteOption,
+    val lineId: String? = null
+)
+
+data class Mode(
+    val id: String,
+    val name: String
+)
+
+data class RouteOption(
+    val name: String,
 )
 
 data class AdditionalProperty(
@@ -53,17 +82,17 @@ data class JourneyVector(
 )
 
 // Extension functions for journey state detection
-fun Journey.requiresDisambiguation(): Boolean {
+fun BusJourney.requiresDisambiguation(): Boolean {
     return (fromLocationDisambiguation?.hasOptions() == true) || 
            (toLocationDisambiguation?.hasOptions() == true) ||
            (viaLocationDisambiguation?.hasOptions() == true)
 }
 
-fun Journey.isValidJourneyResult(): Boolean {
+fun BusJourney.isValidJourneyResult(): Boolean {
     return !requiresDisambiguation() && journeyVector != null
 }
 
-fun Journey.getDisambiguationNeeded(): List<DisambiguationType> {
+fun BusJourney.getDisambiguationNeeded(): List<DisambiguationType> {
     val types = mutableListOf<DisambiguationType>()
     
     if (fromLocationDisambiguation?.hasOptions() == true) {
