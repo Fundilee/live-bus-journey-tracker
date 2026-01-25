@@ -25,19 +25,22 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.livebusjourneytracker.core.domain.model.BusJourney
+import com.livebusjourneytracker.core.domain.model.BusRoute
 import com.livebusjourneytracker.core.ui.theme.components.BottomSheetView
 import com.livebusjourneytracker.core.ui.theme.components.BusRouteItem
 import com.livebusjourneytracker.core.ui.theme.components.SearchView
-import com.livebusjourneytracker.core.domain.model.BusRoute
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -50,11 +53,20 @@ fun LandingScreen(
     var searchQuery by remember { mutableStateOf("") }
     var isMapView by remember { mutableStateOf(false) }
     var selectedRoute by remember { mutableStateOf<BusRoute?>(null) }
+    val fromFocus = remember { FocusRequester() }
+    val toFocus = remember { FocusRequester() }
 
     uiState.journey?.let { journey ->
         BottomSheetView(journey)
     }
 
+    LaunchedEffect(uiState.activeField) {
+        when(uiState.activeField) {
+            BusRouteContract.ActiveSearchField.FROM -> fromFocus.requestFocus()
+            BusRouteContract.ActiveSearchField.TO -> toFocus.requestFocus()
+            BusRouteContract.ActiveSearchField.NONE -> Unit
+        }
+    }
 
     Column(
         modifier = modifier
@@ -97,17 +109,25 @@ fun LandingScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        SearchView(promptText = "From") {
-            viewModel.setEvents(BusRouteContract.BusRoutesEvent.UpdateFromLocation(it))
+        SearchView(promptText = "From", fromFocus, onFromFieldFocused = {
+            viewModel.updateFieldFocus(BusRouteContract.ActiveSearchField.FROM)
+
+        }, onSearch = {
             viewModel.searchRoutes(it)
-        }
+        })
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        SearchView(promptText = "To") {
-            viewModel.setEvents(BusRouteContract.BusRoutesEvent.UpdateToLocation(it))
-            viewModel.searchRoutes(it)
-        }
+        SearchView(
+            promptText = "To",
+            toFocus,
+            onFromFieldFocused = {
+                viewModel.updateFieldFocus(BusRouteContract.ActiveSearchField.TO)
+            },
+            onSearch = {
+                viewModel.searchRoutes(it)
+            }
+        )
 
 
         when {
@@ -156,7 +176,6 @@ fun LandingScreen(
                                 selectedRoute = route
                             },
                             onStopSelected = { stop ->
-                                // Handle stop selection if needed
                             }
                         )
 

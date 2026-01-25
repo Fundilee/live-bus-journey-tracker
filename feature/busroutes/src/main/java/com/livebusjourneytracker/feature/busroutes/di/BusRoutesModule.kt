@@ -4,9 +4,8 @@ import com.livebusjourneytracker.feature.busroutes.BusRoutesViewModel
 import com.livebusjourneytracker.core.data.api.TflApiService
 import com.livebusjourneytracker.core.data.repository.BusRoutesRepositoryImpl
 import com.livebusjourneytracker.core.domain.repository.BusRoutesRepository
-import com.livebusjourneytracker.core.domain.usecase.GetBusRoutesUseCase
 import com.livebusjourneytracker.core.domain.usecase.GetJourneyResultsUseCase
-import com.livebusjourneytracker.core.domain.usecase.GetNearbyStopsUseCase
+import com.livebusjourneytracker.core.domain.usecase.GetBusArrivalsUseCase
 import com.livebusjourneytracker.core.domain.usecase.SearchBusRoutesUseCase
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModelOf
@@ -24,9 +23,8 @@ val busRoutesModule = module {
     singleOf(::BusRoutesRepositoryImpl) bind BusRoutesRepository::class
     
     // Use Cases
-    singleOf(::GetBusRoutesUseCase)
     singleOf(::SearchBusRoutesUseCase)
-    singleOf(::GetNearbyStopsUseCase)
+    singleOf(::GetBusArrivalsUseCase)
     singleOf(::GetJourneyResultsUseCase)
 
     // ViewModel

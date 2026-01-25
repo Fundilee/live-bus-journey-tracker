@@ -9,6 +9,8 @@ object SearchMapper {
         return BusRoute(
             id = matchedStop.id,
             name = matchedStop.name,
+            lat = matchedStop.lat,
+            lon = matchedStop.lon,
             lineStatuses = emptyList(),
             routeSections = emptyList(),
             serviceTypes = emptyList()

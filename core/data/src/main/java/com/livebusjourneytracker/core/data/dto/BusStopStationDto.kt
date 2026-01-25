@@ -28,8 +28,8 @@ data class BusStopDto(
 )
 
 data class StopPointDto(
-    @SerializedName("naptanId")
-    val naptanId: String,
+    @SerializedName("id")
+    val id: String,
     @SerializedName("commonName")
     val commonName: String,
     @SerializedName("distance")

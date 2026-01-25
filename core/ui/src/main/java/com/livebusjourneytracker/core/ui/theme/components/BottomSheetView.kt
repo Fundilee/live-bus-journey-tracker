@@ -15,19 +15,18 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.livebusjourneytracker.core.domain.model.Journey
-import com.livebusjourneytracker.core.domain.model.DisambiguationType
+import com.livebusjourneytracker.core.domain.model.BusJourney
 import com.livebusjourneytracker.core.domain.model.DisambiguationOption
+import com.livebusjourneytracker.core.domain.model.DisambiguationType
 import com.livebusjourneytracker.core.domain.model.requiresDisambiguation
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BottomSheetView(
-    journey: Journey,
+    journey: BusJourney,
     onDisambiguationSelected: (DisambiguationType, DisambiguationOption) -> Unit = { _, _ -> },
     onRetryJourney: () -> Unit = {},
     onDismiss: () -> Unit = {}
@@ -64,7 +63,7 @@ fun BottomSheetView(
 
 @Composable
 private fun DisambiguationContent(
-    journey: Journey,
+    journey: BusJourney,
     onDisambiguationSelected: (DisambiguationType, DisambiguationOption) -> Unit,
     onRetryJourney: () -> Unit
 ) {
@@ -162,23 +161,27 @@ private fun DisambiguationOptionItem(
 }
 
 @Composable
-private fun JourneyResultContent(journey: Journey) {
+private fun JourneyResultContent(journey: BusJourney) {
     Text(
         text = "Journey Details",
         style = MaterialTheme.typography.headlineSmall,
         modifier = Modifier.padding(bottom = 16.dp)
     )
     
-    journey.journeyVector?.let { vector ->
-        Column {
-            vector.from?.let { from ->
-                Text(text = "From: $from", style = MaterialTheme.typography.bodyMedium)
-            }
-            vector.to?.let { to ->
-                Text(text = "To: $to", style = MaterialTheme.typography.bodyMedium)
-            }
-            vector.via?.let { via ->
-                Text(text = "Via: $via", style = MaterialTheme.typography.bodyMedium)
+    journey.journey?.let { vector ->
+        vector.legs.map { leg ->
+            Column {
+                leg.routeOption.name?.let { busNr ->
+                    Text(text = "Bus: $busNr", style = MaterialTheme.typography.bodyMedium)
+                }
+                leg.departurePoint.commonName?.let { from ->
+                    Text(text = "From: $from", style = MaterialTheme.typography.bodyMedium)
+                }
+                leg.arrivalPoint.commonName?.let { to ->
+                    Text(text = "To: $to", style = MaterialTheme.typography.bodyMedium)
+                }
+                Text(text = "Departure: ${leg.departureTime}", style = MaterialTheme.typography.bodyMedium)
+                Text(text = "Arrival: ${leg.arrivalTime}", style = MaterialTheme.typography.bodyMedium)
             }
         }
     } ?: run {

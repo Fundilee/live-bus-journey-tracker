@@ -12,7 +12,25 @@ data class BusRouteDto(
     @SerializedName("routeSections")
     val routeSections: List<RouteSectionDto>? = null,
     @SerializedName("serviceTypes")
-    val serviceTypes: List<ServiceTypeDto>? = null
+    val serviceTypes: List<ServiceTypeDto>? = null,
+    @SerializedName("stations")
+    val stations: List<StationsDto>? = null
+)
+
+data class StationsDto(
+    @SerializedName("status")
+    val status: Boolean,
+    @SerializedName("id")
+    val id: String,
+    @SerializedName("name")
+    val name: String,
+    @SerializedName("lat")
+    val lat: Double,
+    @SerializedName("lon")
+    val lon: Double,
+    @SerializedName("stopType")
+    val stopType: String
+
 )
 
 data class LineStatusDto(

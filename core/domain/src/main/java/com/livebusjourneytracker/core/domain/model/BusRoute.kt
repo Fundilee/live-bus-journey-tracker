@@ -3,9 +3,12 @@ package com.livebusjourneytracker.core.domain.model
 data class BusRoute(
     val id: String,
     val name: String,
+    val lat: Double,
+    val lon: Double,
     val lineStatuses: List<LineStatus> = emptyList(),
     val routeSections: List<RouteSection> = emptyList(),
-    val serviceTypes: List<ServiceType> = emptyList()
+    val serviceTypes: List<ServiceType> = emptyList(),
+    val stations:  List<Stations> = emptyList()
 )
 
 data class LineStatus(
@@ -13,6 +16,16 @@ data class LineStatus(
     val statusSeverity: Int,
     val statusSeverityDescription: String,
     val reason: String? = null
+)
+
+
+data class Stations(
+    val status: Boolean,
+    val id: String,
+    val name: String,
+    val lat: Double,
+    val lon: Double,
+    val stopType: String
 )
 
 data class RouteSection(

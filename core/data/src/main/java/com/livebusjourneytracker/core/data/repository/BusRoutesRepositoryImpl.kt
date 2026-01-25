@@ -1,10 +1,13 @@
 package com.livebusjourneytracker.core.data.repository
 
 import com.livebusjourneytracker.core.data.api.TflApiService
+import com.livebusjourneytracker.core.data.mapper.ArrivalBusStopMapper
 import com.livebusjourneytracker.core.data.mapper.BusRouteMapper
 import com.livebusjourneytracker.core.data.mapper.BusStopMapper
 import com.livebusjourneytracker.core.data.mapper.JourneyMapper
 import com.livebusjourneytracker.core.data.mapper.SearchMapper
+import com.livebusjourneytracker.core.domain.model.ArrivalBusStop
+import com.livebusjourneytracker.core.domain.model.BusJourney
 import com.livebusjourneytracker.core.domain.model.BusRoute
 import com.livebusjourneytracker.core.domain.model.BusStop
 import com.livebusjourneytracker.core.domain.model.Journey
@@ -15,34 +18,6 @@ import kotlinx.coroutines.flow.flow
 class BusRoutesRepositoryImpl(
     private val apiService: TflApiService
 ) : BusRoutesRepository {
-    
-    override suspend fun getAllBusRoutes(): Flow<List<BusRoute>> = flow {
-        try {
-            val response = apiService.getAllBusRoutes()
-            if (response.isSuccessful) {
-                val routes = response.body()?.let { BusRouteMapper.mapToDomainList(it) } ?: emptyList()
-                emit(routes)
-            } else {
-                emit(emptyList())
-            }
-        } catch (e: Exception) {
-            emit(emptyList())
-        }
-    }
-    
-    override suspend fun getBusRouteById(routeId: String): Flow<BusRoute?> = flow {
-        try {
-            val response = apiService.getBusRouteById(routeId)
-            if (response.isSuccessful) {
-                val route = response.body()?.firstOrNull()?.let { BusRouteMapper.mapToDomain(it) }
-                emit(route)
-            } else {
-                emit(null)
-            }
-        } catch (e: Exception) {
-            emit(null)
-        }
-    }
 
     override suspend fun getAllBusJourneys(from: String, to: String): Flow<List<BusRoute>> = flow {
         try {
@@ -74,60 +49,8 @@ class BusRoutesRepositoryImpl(
             emit(emptyList())
         }
     }
-    
-    override suspend fun getBusStopsForRoute(routeId: String): Flow<List<BusStop>> = flow {
-        try {
-            val response = apiService.getStopPointsForLine(routeId)
-            if (response.isSuccessful) {
-                val stops = response.body()?.let { BusStopMapper.mapToDomainList(it) } ?: emptyList()
-                emit(stops)
-            } else {
-                emit(emptyList())
-            }
-        } catch (e: Exception) {
-            emit(emptyList())
-        }
-    }
-    
-    override suspend fun getNearbyBusStops(latitude: Double, longitude: Double, radius: Int): Flow<List<BusStop>> = flow {
-        try {
-            // For now, emit some sample stops around London
-            // In a real implementation, you'd call the TfL API for nearby stops
-            val sampleStops = listOf(
-                BusStop(
-                    id = "490000001E",
-                    name = "Oxford Circus",
-                    commonName = "Oxford Circus",
-                    distance = 100.0,
-                    bearing = "NE",
-                    naptanId = "490000001E",
-                    lat = 51.5154,
-                    lon = -0.1441,
-                    stopType = "NaptanBusCoachStation",
-                    zone = "1",
-                    lines = listOf("3", "6", "12", "23")
-                ),
-                BusStop(
-                    id = "490000002E",
-                    name = "Regent Street",
-                    commonName = "Regent Street",
-                    distance = 200.0,
-                    bearing = "SE",
-                    naptanId = "490000002E",
-                    lat = 51.5118,
-                    lon = -0.1395,
-                    stopType = "NaptanBusCoachStation",
-                    zone = "1",
-                    lines = listOf("3", "6", "12")
-                )
-            )
-            emit(sampleStops)
-        } catch (e: Exception) {
-            emit(emptyList())
-        }
-    }
-    
-    override suspend fun planJourney(from: String, to: String): Flow<Journey?> = flow {
+
+    override suspend fun planJourney(from: String, to: String): Flow<BusJourney?> = flow {
         try {
             val response = apiService.journeyResults(from, to)
             if (response.isSuccessful) {
@@ -143,16 +66,47 @@ class BusRoutesRepositoryImpl(
         }
     }
 
-    override suspend fun refreshBusRoutes(): Result<Unit> {
-        return try {
-            val response = apiService.getAllBusRoutes()
+    override suspend fun getBusRouteArrivalsById(lineId: String): Flow<List<ArrivalBusStop>> = flow {
+        try {
+            val response = apiService.getBusRouteArrivalsById(lineId)
             if (response.isSuccessful) {
-                Result.success(Unit)
+                val arrivalBusStops = response.body()?.let { ArrivalBusStopMapper.mapToDomainList(it) } ?: emptyList()
+                emit(arrivalBusStops)
             } else {
-                Result.failure(Exception("Failed to refresh: ${response.message()}"))
+                // Emit null on API failure
+                emit(emptyList())
             }
         } catch (e: Exception) {
-            Result.failure(e)
+            // Emit null on exception
+            emit(emptyList())
         }
     }
+
+    override suspend fun getRouteSequence(lineId: String): Flow<List<BusRoute>> = flow {
+        try {
+            val response = apiService.getRouteSequence(lineId)
+            if (response.isSuccessful) {
+                val routeSequence = response.body()?.let { BusRouteMapper.mapToDomainList(it) } ?: emptyList()
+                emit(routeSequence)
+            } else {
+                // Emit null on API failure
+                emit(emptyList())
+            }
+        } catch (e: Exception) {
+            // Emit null on exception
+            emit(emptyList())
+        }
+    }
+//    override suspend fun refreshBusRoutes(): Result<Unit> {
+//        return try {
+//            val response = apiService.()
+//            if (response.isSuccessful) {
+//                Result.success(Unit)
+//            } else {
+//                Result.failure(Exception("Failed to refresh: ${response.message()}"))
+//            }
+//        } catch (e: Exception) {
+//            Result.failure(e)
+//        }
+//    }
 }

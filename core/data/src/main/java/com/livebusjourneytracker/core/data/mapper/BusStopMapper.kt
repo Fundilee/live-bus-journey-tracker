@@ -27,7 +27,7 @@ object BusStopMapper {
     
     fun mapStopPointToDomain(dto: StopPointDto): StopPoint {
         return StopPoint(
-            naptanId = dto.naptanId,
+            naptanId = dto.id,
             commonName = dto.commonName,
             distance = dto.distance,
             modes = dto.modes,
