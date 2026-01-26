@@ -7,6 +7,8 @@ data class BusRouteDto(
     val id: String,
     @SerializedName("name")
     val name: String,
+    @SerializedName("lineStrings")
+    val lineStrings: List<String>? = null,
     @SerializedName("lineStatuses")
     val lineStatuses: List<LineStatusDto>? = null,
     @SerializedName("routeSections")

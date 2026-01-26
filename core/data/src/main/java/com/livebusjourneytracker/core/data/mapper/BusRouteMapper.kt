@@ -23,6 +23,7 @@ object BusRouteMapper {
             routeSections = dto.routeSections?.map { mapRouteSectionToDomain(it) } ?: emptyList(),
             serviceTypes = dto.serviceTypes?.map { mapServiceTypeToDomain(it) } ?: emptyList(),
             stations = dto.stations?.map { mapStationToDomain(it) } ?: emptyList(),
+            lines = dto.lineStrings ?: emptyList()
         )
     }
     

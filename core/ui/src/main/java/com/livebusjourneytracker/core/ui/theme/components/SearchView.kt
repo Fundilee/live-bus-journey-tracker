@@ -16,25 +16,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.livebusjourneytracker.core.ui.R
 
 @Composable
 fun SearchView(
-    promptText: String, focusRequester: FocusRequester,
-    onSearch: (String) -> Unit, onFromFieldFocused: (Boolean) -> Unit
+    promptText: String, 
+    focusRequester: FocusRequester,
+    value: String = "",
+    onSearch: (String) -> Unit, 
+    onFromFieldFocused: (Boolean) -> Unit
 ) {
-    var query by remember { mutableStateOf("") }
 
     OutlinedTextField(
-        value = query,
-        onValueChange = {
-            query = it
-            onSearch(query)
-        },
+        value = value,
+        onValueChange = { onSearch(it) },
 
         label = { Text(promptText) },
         leadingIcon = {
-            Icon(Icons.Default.Search, contentDescription = "Search")
+            Icon(Icons.Default.Search, contentDescription = stringResource(R.string.search))
         },
         modifier = Modifier
             .focusRequester(focusRequester)

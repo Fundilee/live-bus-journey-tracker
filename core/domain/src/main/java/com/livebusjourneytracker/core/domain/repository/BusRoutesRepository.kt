@@ -12,8 +12,4 @@ interface BusRoutesRepository {
     suspend fun planJourney(from: String, to: String): Flow<BusJourney?>
 
     suspend fun getBusArrivalsById(lineId: String): Flow<List<BusArrival>>
-
-    suspend fun getOutboundRouteSequence(lineId: String): Flow<BusRoute?>
-
-
 }

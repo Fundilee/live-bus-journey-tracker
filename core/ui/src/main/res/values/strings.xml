@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="search_with_selected_locations">Search with selected locations</string>
+    <string name="no_bus_routes_available">No bus routes available</string>
+    <string name="departure">Departure: %1$s</string>
+    <string name="arrival">Arrival: %1$s</string>
+    <string name="to">To: %1$s</string>
+    <string name="from">From: %1$s</string>
+    <string name="bus">Bus: %1$s</string>
+    <string name="journey_details">Journey Details</string>
+    <string name="unknown_location">Unknown Location</string>
+    <string name="to_location">TO Location:</string>
+    <string name="from_location">FROM Location:</string>
+    <string name="please_select_the_correct_location">Please select the correct location:</string>
+    <string name="multiple_locations_found">Multiple locations found</string>
+    <string name="search">Search</string>
+</resources>

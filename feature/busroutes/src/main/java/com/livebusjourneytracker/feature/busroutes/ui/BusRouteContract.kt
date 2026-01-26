@@ -1,4 +1,4 @@
-package com.livebusjourneytracker.feature.busroutes
+package com.livebusjourneytracker.feature.busroutes.ui
 
 import com.livebusjourneytracker.core.domain.model.BusArrival
 import com.livebusjourneytracker.core.domain.model.BusJourney
@@ -6,9 +6,14 @@ import com.livebusjourneytracker.core.domain.model.BusRoute
 import com.livebusjourneytracker.core.domain.model.BusStop
 import com.livebusjourneytracker.core.domain.model.DisambiguationOption
 import com.livebusjourneytracker.core.domain.model.DisambiguationType
+import com.livebusjourneytracker.core.domain.model.Journeys
 
 class BusRouteContract {
 
+    data class BusCoordinates(
+        val lat: Double?,
+        val lon: Double?,
+    )
 
     enum class ActiveSearchField {
         FROM, TO, NONE
@@ -27,8 +32,8 @@ class BusRouteContract {
         val error: String? = null,
         val fromLocation: String = "",
         val toLocation: String = "",
-        val fromCoordinates: String = "",
-        val toCoordinates: String = "",
+        val fromCoordinates: BusCoordinates? = null,
+        val toCoordinates: BusCoordinates? = null,
         val selectedToDestination: String = "",
         val selectedFromDestination: String = "",
         val journeyPlanned: Boolean = false,
@@ -42,13 +47,15 @@ class BusRouteContract {
         val selectedFromOption: DisambiguationOption? = null,
         val selectedToOption: DisambiguationOption? = null,
         val selectedViaOption: DisambiguationOption? = null,
+        val lines: List<List<BusCoordinates>>? = null,
+        val currentTrackingLineId: String? = null,
     )
 
     sealed class BusRoutesEvent {
         data class UpdateFromLocation(val fromLocation: String) : BusRoutesEvent()
         data class UpdateToLocation(val toLocation: String) : BusRoutesEvent()
         data class UpdateSelectedDestination(val selectedDestination: BusRoute) : BusRoutesEvent()
-        data class FetchLiveBuses(val lineId: String) : BusRoutesEvent()
+        data class FetchLiveBuses(val journey: Journeys) : BusRoutesEvent()
 
         data class SelectDisambiguationOption(
             val type: DisambiguationType, val option: DisambiguationOption
