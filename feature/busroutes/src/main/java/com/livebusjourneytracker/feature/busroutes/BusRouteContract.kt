@@ -16,6 +16,7 @@ class BusRouteContract {
 
     data class BusRoutesUiState(
         val isLoading: Boolean = false,
+        val isBusArrivalSuccess: Boolean = false,
         val isLoadingStops: Boolean = false,
         val isLoadingJourney: Boolean = false,
         val routes: List<BusRoute> = emptyList(),

@@ -6,6 +6,7 @@ import com.livebusjourneytracker.core.data.repository.BusRoutesRepositoryImpl
 import com.livebusjourneytracker.core.domain.repository.BusRoutesRepository
 import com.livebusjourneytracker.core.domain.usecase.GetJourneyResultsUseCase
 import com.livebusjourneytracker.core.domain.usecase.GetBusArrivalsUseCase
+import com.livebusjourneytracker.core.domain.usecase.GetOutboundRouteSequenceUseCase
 import com.livebusjourneytracker.core.domain.usecase.SearchBusRoutesUseCase
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModelOf
@@ -25,6 +26,7 @@ val busRoutesModule = module {
     // Use Cases
     singleOf(::SearchBusRoutesUseCase)
     singleOf(::GetBusArrivalsUseCase)
+    singleOf(::GetOutboundRouteSequenceUseCase)
     singleOf(::GetJourneyResultsUseCase)
 
     // ViewModel

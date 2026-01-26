@@ -56,8 +56,20 @@ fun LandingScreen(
     val toFocus = remember { FocusRequester() }
 
     uiState.journey?.let { journey ->
-        BottomSheetView(journey) { lineId ->
+        BottomSheetView(
+            journey = journey,
+            onDisambiguationSelected = { type, option ->
+                viewModel.setEvents(BusRouteContract.BusRoutesEvent.SelectDisambiguationOption(type, option))
+            },
+            onRetryJourney = {
+                viewModel.setEvents(BusRouteContract.BusRoutesEvent.RetryJourneyWithSelectedOptions)
+            },
+            onDismiss = {
+                viewModel.clearJourney()
+            }
+        ) { lineId ->
             viewModel.setEvents(BusRouteContract.BusRoutesEvent.FetchLiveBuses(lineId))
+            viewModel.getOutboundRouteSequence(lineId)
         }
     }
 
@@ -66,6 +78,12 @@ fun LandingScreen(
             BusRouteContract.ActiveSearchField.FROM -> fromFocus.requestFocus()
             BusRouteContract.ActiveSearchField.TO -> toFocus.requestFocus()
             BusRouteContract.ActiveSearchField.NONE -> Unit
+        }
+    }
+
+    LaunchedEffect(uiState.isBusArrivalSuccess) {
+        if (uiState.isBusArrivalSuccess) {
+            isMapView = true
         }
     }
 
@@ -170,8 +188,9 @@ fun LandingScreen(
                 Box(modifier = Modifier.fillMaxSize()) {
                     if (isMapView) {
                         BusRoutesMapView(
-                            routes = uiState.routes,
+                            routes = uiState.busArrivals,
                             stops = uiState.nearbyStops,
+                            busRoute = uiState.busRouteSequence,
                             modifier = Modifier.fillMaxSize(),
                             onRouteSelected = { route ->
                                 selectedRoute = route
@@ -181,11 +200,11 @@ fun LandingScreen(
                         )
 
                         selectedRoute?.let { route ->
-                            BusRouteInfoCard(
-                                route = route,
-                                modifier = Modifier.align(Alignment.BottomCenter),
-                                onDismiss = { selectedRoute = null }
-                            )
+//                            BusRouteInfoCard(
+//                                route = route,
+//                                modifier = Modifier.align(Alignment.BottomCenter),
+//                                onDismiss = { selectedRoute = null }
+//                            )
                         }
                     } else {
                         LazyColumn {

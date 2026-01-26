@@ -179,45 +179,42 @@ private fun JourneyResultContent(journey: BusJourney, onJourneySelected: (String
 
     LazyColumn(modifier = Modifier.fillMaxWidth()) {
         items(journey.journey) { route ->
+
+            val busLeg = route.legs.firstOrNull() ?: return@items
+
             Card(
                 modifier = Modifier
-                    .padding(top = 5.dp, bottom = 5.dp)
+                    .padding(vertical = 5.dp)
                     .clickable {
                         val lineId = getBusLineId(route)
-                        if (lineId != null) {
-                            onJourneySelected(lineId)
-                        }
-                    }) {
-                route.legs.map { leg ->
-                    Column {
-                        leg.routeOptions?.name?.let { busNr ->
-                            Text(
-                                text = "Bus: $busNr",
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                        }
-                        leg.departurePoint.commonName?.let { from ->
-                            Text(
-                                text = "From: $from",
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                        }
-                        leg.arrivalPoint.commonName?.let { to ->
-                            Text(text = "To: $to", style = MaterialTheme.typography.bodyMedium)
-                        }
-                        Text(
-                            text = "Departure: ${leg.departureTime}",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                        Text(
-                            text = "Arrival: ${leg.arrivalTime}",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
+                        lineId?.let(onJourneySelected)
                     }
+            ) {
+                Column(modifier = Modifier.padding(12.dp)) {
+
+                    busLeg.routeOptions?.firstOrNull()?.name?.let { busNr ->
+                        Text("Bus: $busNr")
+                    }
+
+                    Text(
+                        "From: ${busLeg.departurePoint.commonName}",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Text(
+                        "To: ${busLeg.arrivalPoint.commonName}",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Text(
+                        "Departure: ${busLeg.departureTime}",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Text(
+                        "Arrival: ${busLeg.arrivalTime}",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
                 }
             }
         }
-
 
         if (journey.journey.isEmpty()) {
             item {
@@ -234,5 +231,9 @@ private fun JourneyResultContent(journey: BusJourney, onJourneySelected: (String
 }
 
 fun getBusLineId(journey: Journeys): String? {
-    return journey.legs.firstOrNull()?.routeOptions?.name
+    return journey.legs
+        .firstOrNull { it.mode?.id == "bus" }
+        ?.routeOptions
+        ?.firstOrNull()
+        ?.name
 }

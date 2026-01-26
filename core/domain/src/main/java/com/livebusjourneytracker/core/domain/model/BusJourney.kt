@@ -37,7 +37,7 @@ data class Legs(
     val departurePoint: Place,
     val arrivalPoint: Place,
     val mode: Mode?,
-    val routeOptions: RouteOption?,
+    val routeOptions: List<RouteOption>?,
     val lineId: String? = null
 )
 

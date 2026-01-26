@@ -52,7 +52,6 @@ class BusRoutesViewModel(
     }
 
     fun fetchLiveBuses(lineId: String) {
-        //TODO Refresh every 30seconds
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             try {
@@ -60,6 +59,7 @@ class BusRoutesViewModel(
                     _uiState.update {
                         it.copy(
                             isLoading = false,
+                            isBusArrivalSuccess = true,
                             busArrivals = busArrivals
                         )
                     }
@@ -67,6 +67,7 @@ class BusRoutesViewModel(
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(
+                        isBusArrivalSuccess = false,
                         isLoading = false,
                         error = e.message
                     )
@@ -137,17 +138,17 @@ class BusRoutesViewModel(
 //    }
 
     private fun handleJourneyResponse(journey: BusJourney?) {
-        if (journey == null) {
-            _uiState.update {
-                it.copy(
-                    isLoadingJourney = false,
-                    error = "No journey found"
-                )
-            }
-            return
-        }
+//        if (journey == null) {
+//            _uiState.update {
+//                it.copy(
+//                    isLoadingJourney = false,
+//                    error = "No journey found"
+//                )
+//            }
+//            return
+//        }
 
-        if (journey.requiresDisambiguation()) {
+        if (journey?.requiresDisambiguation()==true) {
             // Handle disambiguation
             val disambiguationTypes = journey.getDisambiguationNeeded()
             _uiState.update {
@@ -181,6 +182,16 @@ class BusRoutesViewModel(
     fun clearError() {
         _uiState.update {
             it.copy(error = null)
+        }
+    }
+
+    fun clearJourney() {
+        _uiState.update {
+            it.copy(
+                journey = null,
+                requiresDisambiguation = false,
+                journeyPlanned = false
+            )
         }
     }
 
@@ -221,12 +232,12 @@ class BusRoutesViewModel(
         _uiState.update {
             when (it.activeField) {
                 BusRouteContract.ActiveSearchField.FROM -> it.copy(
-                    fromLocation = selectedDestination.lat.toString() + "," + selectedDestination.lon.toString(),
+                    fromLocation = selectedDestination.name,
                     activeField = BusRouteContract.ActiveSearchField.TO
                 )
 
                 BusRouteContract.ActiveSearchField.TO -> it.copy(
-                    toLocation = selectedDestination.lat.toString() + "," + selectedDestination.lon.toString(),
+                    toLocation = selectedDestination.name,
                     activeField = BusRouteContract.ActiveSearchField.FROM
                 )
 
@@ -260,6 +271,8 @@ class BusRoutesViewModel(
 
         _uiState.update {
             it.copy(
+                fromLocation = fromLocation,
+                toLocation = toLocation,
                 requiresDisambiguation = false,
                 selectedFromOption = null,
                 selectedToOption = null,
