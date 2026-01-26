@@ -6,7 +6,7 @@ data class BusArrivalDto(
     @SerializedName("naptanId")
     val naptanId: String,
     @SerializedName("vehicleId")
-    val vehicleId: Double,
+    val vehicleId: String,
     @SerializedName("timeToStation")
     val timeToStation: Double,
     @SerializedName("stationName")

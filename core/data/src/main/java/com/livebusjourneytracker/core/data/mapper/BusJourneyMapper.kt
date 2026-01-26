@@ -27,8 +27,17 @@ import com.livebusjourneytracker.core.domain.model.SearchCriteria
 object BusJourneyMapper {
 
     fun mapToDomain(dto: JourneyResponseDto): BusJourney {
-        Log.d("Mapper is called", dto.journeys.toString())
-        return BusJourney(
+        Log.d("MAPPER_DEBUG", "Journeys: ${dto.journeys}")
+        Log.d(
+            "MAPPER_DEBUG",
+            "From disambiguation: ${dto.fromLocationDisambiguation?.disambiguationOptions?.size}"
+        )
+        Log.d(
+            "MAPPER_DEBUG",
+            "To disambiguation: ${dto.toLocationDisambiguation?.disambiguationOptions?.size}"
+        )
+
+        val busJourney = BusJourney(
             toLocationDisambiguation = dto.toLocationDisambiguation?.let {
                 mapDisambiguationToDomain(
                     it
@@ -50,15 +59,18 @@ object BusJourneyMapper {
             journey = dto.journeys?.let { it -> it.map { mapJourneyToDomain(it) } } ?: emptyList()
         )
 
+        return busJourney
     }
 
     private fun mapDisambiguationToDomain(dto: DisambiguationDto): Disambiguation {
         return Disambiguation(
-            disambiguationOptions = dto.disambiguationOptions.map {
-                mapDisambiguationOptionToDomain(
-                    it
-                )
-            },
+            disambiguationOptions = dto.disambiguationOptions?.let {
+                it.map { options ->
+                    mapDisambiguationOptionToDomain(
+                        options
+                    )
+                }
+            } ?: emptyList(),
             matchStatus = dto.matchStatus
         )
     }
@@ -118,7 +130,7 @@ object BusJourneyMapper {
             departurePoint = mapPlaceToDomain(dto.departurePoint),
             arrivalPoint = mapPlaceToDomain(dto.arrivalPoint),
             mode = dto.mode?.let { mapModeToDomain(it) },
-            routeOptions = dto.routeOptions?.let { mapRouteOptionToDomain(it) },
+            routeOptions = dto.routeOptions?.let { it.map { mapRouteOptionToDomain(it) } },
             lineId = dto.lineId
         )
     }
@@ -130,9 +142,10 @@ object BusJourneyMapper {
             startDateTime = dto.startDateTime,
             arrivalDateTime = dto.arrivalDateTime,
             duration = dto.duration,
-            legs = dto.legs.map { mapLegsToDomain(it) },
+            legs = dto.legs
+                .filter { it.mode?.id == "bus" }
+                .map { mapLegsToDomain(it) }
         )
-
     }
 
     private fun mapSearchCriteriaToDomain(dto: SearchCriteriaDto): SearchCriteria {

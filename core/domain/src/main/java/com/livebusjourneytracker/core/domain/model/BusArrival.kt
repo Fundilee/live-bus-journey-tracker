@@ -2,11 +2,11 @@ package com.livebusjourneytracker.core.domain.model
 
 data class BusArrival(
     val naptanId: String,
-    val vehicleId: Double,
+    val vehicleId: String,
     val timeToStation: Double,
     val stationName: String,
     val modeName: String,
     val expectedArrival: String,
-    val lat: Double? = null,
-    val lon: Double? = null
+    val lat: Double = 0.0,
+    val lon: Double = 0.0
 )

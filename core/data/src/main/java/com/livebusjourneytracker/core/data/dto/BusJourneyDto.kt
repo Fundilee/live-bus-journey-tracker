@@ -5,11 +5,17 @@ import com.google.gson.annotations.SerializedName
 data class JourneyResponseDto(
     @SerializedName("\$type")
     val type: String,
+    @SerializedName("toLocationDisambiguation")
     val toLocationDisambiguation: DisambiguationDto?,
+    @SerializedName("fromLocationDisambiguation")
     val fromLocationDisambiguation: DisambiguationDto?,
+    @SerializedName("viaLocationDisambiguation")
     val viaLocationDisambiguation: DisambiguationDto?,
+    @SerializedName("recommendedMaxAgeMinutes")
     val recommendedMaxAgeMinutes: Int?,
+    @SerializedName("searchCriteria")
     val searchCriteria: SearchCriteriaDto?,
+    @SerializedName("journeyVector")
     val journeyVector: JourneyVectorDto?,
     @SerializedName("journeys")
     val journeys: List<JourneyDto>? = null
@@ -18,7 +24,9 @@ data class JourneyResponseDto(
 data class DisambiguationDto(
     @SerializedName("\$type")
     val type: String,
-    val disambiguationOptions: List<DisambiguationOptionDto> = emptyList(),
+    @SerializedName("disambiguationOptions")
+    val disambiguationOptions: List<DisambiguationOptionDto>? = null,
+    @SerializedName("matchStatus")
     val matchStatus: String?
 )
 
@@ -45,7 +53,7 @@ data class LegDto(
     val departurePoint: PlaceDto,
     val arrivalPoint: PlaceDto,
     val mode: ModeDto?,
-    val routeOptions: RouteOptionDto?,
+    val routeOptions: List<RouteOptionDto>?,
     val lineId: String?
 )
 
