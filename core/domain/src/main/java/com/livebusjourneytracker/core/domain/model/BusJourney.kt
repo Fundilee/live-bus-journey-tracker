@@ -7,7 +7,7 @@ data class BusJourney(
     val recommendedMaxAgeMinutes: Int?,
     val searchCriteria: SearchCriteria?,
     val journeyVector: JourneyVector?,
-    val journey: Journey?,
+    val journey: List<Journeys> = emptyList(),
 )
 
 data class Disambiguation(
@@ -22,32 +22,32 @@ data class DisambiguationOption(
     val matchQuality: Int
 )
 
-data class Journey (
+data class Journeys (
     val startDateTime: String,
     val arrivalDateTime: String,
     val duration: Int,
-    val legs: List<Leg> = emptyList()
+    val legs: List<Legs> = emptyList()
 
 )
 
-data class Leg(
+data class Legs(
     val duration: Int,
-    val departureTime: String,
-    val arrivalTime: String,
+    val departureTime: String? = null,
+    val arrivalTime: String? = null,
     val departurePoint: Place,
     val arrivalPoint: Place,
-    val mode: Mode,
-    val routeOption: RouteOption,
+    val mode: Mode?,
+    val routeOptions: RouteOption?,
     val lineId: String? = null
 )
 
 data class Mode(
-    val id: String,
-    val name: String
+    val id: String? = null,
+    val name: String? = null
 )
 
 data class RouteOption(
-    val name: String,
+    val name: String? = null,
 )
 
 data class AdditionalProperty(
@@ -58,12 +58,11 @@ data class AdditionalProperty(
 
 data class Place(
     val naptanId: String? = null,
-    val modes: List<String>? = null,
     val icsCode: String? = null,
     val stopType: String? = null,
     val url: String?,
-    val commonName: String?,
-    val placeType: String?,
+    val commonName: String? = null,
+    val placeType: String? = null,
     val additionalProperties: List<AdditionalProperty> = emptyList(),
     val lat: Double?,
     val lon: Double?

@@ -36,7 +36,6 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.livebusjourneytracker.core.domain.model.BusJourney
 import com.livebusjourneytracker.core.domain.model.BusRoute
 import com.livebusjourneytracker.core.ui.theme.components.BottomSheetView
 import com.livebusjourneytracker.core.ui.theme.components.BusRouteItem
@@ -57,11 +56,13 @@ fun LandingScreen(
     val toFocus = remember { FocusRequester() }
 
     uiState.journey?.let { journey ->
-        BottomSheetView(journey)
+        BottomSheetView(journey) { lineId ->
+            viewModel.setEvents(BusRouteContract.BusRoutesEvent.FetchLiveBuses(lineId))
+        }
     }
 
     LaunchedEffect(uiState.activeField) {
-        when(uiState.activeField) {
+        when (uiState.activeField) {
             BusRouteContract.ActiveSearchField.FROM -> fromFocus.requestFocus()
             BusRouteContract.ActiveSearchField.TO -> toFocus.requestFocus()
             BusRouteContract.ActiveSearchField.NONE -> Unit

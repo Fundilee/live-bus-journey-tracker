@@ -1,9 +1,6 @@
 package com.livebusjourneytracker.core.data.dto
 
 import com.google.gson.annotations.SerializedName
-import com.livebusjourneytracker.core.domain.model.Mode
-import com.livebusjourneytracker.core.domain.model.Place
-import com.livebusjourneytracker.core.domain.model.RouteOption
 
 data class JourneyResponseDto(
     @SerializedName("\$type")
@@ -14,7 +11,8 @@ data class JourneyResponseDto(
     val recommendedMaxAgeMinutes: Int?,
     val searchCriteria: SearchCriteriaDto?,
     val journeyVector: JourneyVectorDto?,
-    val journey: JourneyDto?
+    @SerializedName("journeys")
+    val journeys: List<JourneyDto>? = null
 )
 
 data class DisambiguationDto(
@@ -38,42 +36,38 @@ data class JourneyDto (
     val arrivalDateTime: String,
     val duration: Int,
     val legs: List<LegDto>
-
 )
 
 data class LegDto(
-    val duration: Int,
-    val departureTime: String,
-    val arrivalTime: String,
-    val departurePoint: Place,
-    val arrivalPoint: Place,
-    val mode: ModeDto,
-    val routeOption: RouteOptionDto,
-    val lineId: String? = null
+    val duration: Int?,
+    val departureTime: String?,
+    val arrivalTime: String?,
+    val departurePoint: PlaceDto,
+    val arrivalPoint: PlaceDto,
+    val mode: ModeDto?,
+    val routeOptions: RouteOptionDto?,
+    val lineId: String?
 )
 
 data class ModeDto(
-    val id: String,
-    val name: String
+    val id: String?,
+    val name: String?
 )
 
 data class RouteOptionDto(
-    val name: String,
+    val name: String?,
 )
-
-
 
 data class PlaceDto(
     @SerializedName("\$type")
     val type: String,
     val naptanId: String?,
-    val modes: List<String>?,
     val icsCode: String?,
     val stopType: String?,
     val url: String?,
     val commonName: String?,
     val placeType: String?,
-    val additionalProperties: List<AdditionalPropertyDto> = emptyList(),
+    val additionalProperties: List<AdditionalPropertyDto>? = null,
     val lat: Double?,
     val lon: Double?
 )

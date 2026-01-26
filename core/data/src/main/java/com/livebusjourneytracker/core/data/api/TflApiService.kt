@@ -1,6 +1,6 @@
 package com.livebusjourneytracker.core.data.api
 
-import com.livebusjourneytracker.core.data.dto.ArrivalsBusStopsDto
+import com.livebusjourneytracker.core.data.dto.BusArrivalDto
 import com.livebusjourneytracker.core.data.dto.BusRouteDto
 import com.livebusjourneytracker.core.data.dto.JourneyResponseDto
 import com.livebusjourneytracker.core.data.dto.SearchResponseDto
@@ -11,7 +11,7 @@ import retrofit2.http.Path
 interface TflApiService {
 
     @GET("/Line/{lineId}/Arrivals")
-    suspend fun getBusRouteArrivalsById(@Path("lineId") lineId: String): Response<List<ArrivalsBusStopsDto>>
+    suspend fun getBusRouteArrivalsById(@Path("lineId") lineId: String): Response<List<BusArrivalDto>>
 
     @GET("StopPoint/Search/{query}?modes=bus")
     suspend fun searchBusRoutes(@Path("query") query: String): Response<SearchResponseDto>
@@ -23,5 +23,5 @@ interface TflApiService {
     ): Response<JourneyResponseDto>
 
     @GET("/Line/{lineId}/Route/Sequence/outbound")
-    suspend fun getRouteSequence(@Path("lineId") lineId: String): Response<List<BusRouteDto>>
+    suspend fun getOutboundRouteSequence(@Path("lineId") lineId: String): Response<BusRouteDto>
 }

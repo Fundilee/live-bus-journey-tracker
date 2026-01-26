@@ -20,6 +20,7 @@ kotlinxSerialization = "1.7.3"
 playServicesLocation = "21.3.0"
 jetbrainsKotlinJvm = "2.0.21"
 googleMapsCompose = "6.5.2"
+timber = "5.0.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -65,6 +66,7 @@ kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 google-maps-android = { group = "com.google.android.gms", name = "play-services-maps", version.ref = "googleMaps" }
 google-maps-compose = { group = "com.google.maps.android", name = "maps-compose", version.ref = "googleMapsCompose" }
 google-play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
+timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
