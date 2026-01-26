@@ -16,10 +16,12 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.livebusjourneytracker.core.domain.model.BusJourney
 import com.livebusjourneytracker.core.domain.model.DisambiguationOption
 import com.livebusjourneytracker.core.domain.model.DisambiguationType
+import com.livebusjourneytracker.core.domain.model.Journeys
 import com.livebusjourneytracker.core.domain.model.requiresDisambiguation
 import kotlinx.coroutines.launch
 
@@ -29,15 +31,16 @@ fun BottomSheetView(
     journey: BusJourney,
     onDisambiguationSelected: (DisambiguationType, DisambiguationOption) -> Unit = { _, _ -> },
     onRetryJourney: () -> Unit = {},
-    onDismiss: () -> Unit = {}
+    onDismiss: () -> Unit = {},
+    onBusRouteSelected: (String) -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState()
     val coroutineScope = rememberCoroutineScope()
 
     ModalBottomSheet(
         onDismissRequest = {
-            coroutineScope.launch { 
-                sheetState.hide() 
+            coroutineScope.launch {
+                sheetState.hide()
                 onDismiss()
             }
         },
@@ -55,7 +58,12 @@ fun BottomSheetView(
                     onRetryJourney = onRetryJourney
                 )
             } else {
-                JourneyResultContent(journey = journey)
+                JourneyResultContent(
+                    journey = journey,
+                    onJourneySelected = {
+                        onBusRouteSelected(it)
+                    }
+                )
             }
         }
     }
@@ -72,7 +80,7 @@ private fun DisambiguationContent(
         style = MaterialTheme.typography.headlineSmall,
         modifier = Modifier.padding(bottom = 16.dp)
     )
-    
+
     Text(
         text = "Please select the correct location:",
         style = MaterialTheme.typography.bodyMedium,
@@ -117,7 +125,7 @@ private fun DisambiguationContent(
                 }
             }
         }
-        
+
         item {
             Button(
                 onClick = onRetryJourney,
@@ -161,34 +169,70 @@ private fun DisambiguationOptionItem(
 }
 
 @Composable
-private fun JourneyResultContent(journey: BusJourney) {
+private fun JourneyResultContent(journey: BusJourney, onJourneySelected: (String) -> Unit) {
+
     Text(
         text = "Journey Details",
         style = MaterialTheme.typography.headlineSmall,
         modifier = Modifier.padding(bottom = 16.dp)
     )
-    
-    journey.journey?.let { vector ->
-        vector.legs.map { leg ->
-            Column {
-                leg.routeOption.name?.let { busNr ->
-                    Text(text = "Bus: $busNr", style = MaterialTheme.typography.bodyMedium)
+
+    LazyColumn(modifier = Modifier.fillMaxWidth()) {
+        items(journey.journey) { route ->
+            Card(
+                modifier = Modifier
+                    .padding(top = 5.dp, bottom = 5.dp)
+                    .clickable {
+                        val lineId = getBusLineId(route)
+                        if (lineId != null) {
+                            onJourneySelected(lineId)
+                        }
+                    }) {
+                route.legs.map { leg ->
+                    Column {
+                        leg.routeOptions?.name?.let { busNr ->
+                            Text(
+                                text = "Bus: $busNr",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                        leg.departurePoint.commonName?.let { from ->
+                            Text(
+                                text = "From: $from",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                        leg.arrivalPoint.commonName?.let { to ->
+                            Text(text = "To: $to", style = MaterialTheme.typography.bodyMedium)
+                        }
+                        Text(
+                            text = "Departure: ${leg.departureTime}",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Text(
+                            text = "Arrival: ${leg.arrivalTime}",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
                 }
-                leg.departurePoint.commonName?.let { from ->
-                    Text(text = "From: $from", style = MaterialTheme.typography.bodyMedium)
-                }
-                leg.arrivalPoint.commonName?.let { to ->
-                    Text(text = "To: $to", style = MaterialTheme.typography.bodyMedium)
-                }
-                Text(text = "Departure: ${leg.departureTime}", style = MaterialTheme.typography.bodyMedium)
-                Text(text = "Arrival: ${leg.arrivalTime}", style = MaterialTheme.typography.bodyMedium)
             }
         }
-    } ?: run {
-        Text(
-            text = "Journey details not available",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+
+
+        if (journey.journey.isEmpty()) {
+            item {
+                Text(
+                    text = "No bus routes available",
+                    modifier = Modifier.padding(16.dp),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
     }
+}
+
+fun getBusLineId(journey: Journeys): String? {
+    return journey.legs.firstOrNull()?.routeOptions?.name
 }

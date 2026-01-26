@@ -2,7 +2,7 @@ package com.livebusjourneytracker.core.data.dto
 
 import com.google.gson.annotations.SerializedName
 
-data class ArrivalsBusStopsDto(
+data class BusArrivalDto(
     @SerializedName("naptanId")
     val naptanId: String,
     @SerializedName("vehicleId")
@@ -10,5 +10,9 @@ data class ArrivalsBusStopsDto(
     @SerializedName("timeToStation")
     val timeToStation: Double,
     @SerializedName("stationName")
-    val stationName: String
+    val stationName: String,
+    @SerializedName("modeName")
+    val modeName: String,
+    @SerializedName("expectedArrival")
+    val expectedArrival: String
 )

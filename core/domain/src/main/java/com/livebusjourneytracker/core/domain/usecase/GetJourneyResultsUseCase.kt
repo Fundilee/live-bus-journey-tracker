@@ -1,7 +1,6 @@
 package com.livebusjourneytracker.core.domain.usecase
 
 import com.livebusjourneytracker.core.domain.model.BusJourney
-import com.livebusjourneytracker.core.domain.model.Journey
 import com.livebusjourneytracker.core.domain.repository.BusRoutesRepository
 import kotlinx.coroutines.flow.Flow
 

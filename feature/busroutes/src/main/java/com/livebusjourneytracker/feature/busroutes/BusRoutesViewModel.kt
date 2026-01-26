@@ -8,8 +8,9 @@ import com.livebusjourneytracker.core.domain.model.DisambiguationOption
 import com.livebusjourneytracker.core.domain.model.DisambiguationType
 import com.livebusjourneytracker.core.domain.model.getDisambiguationNeeded
 import com.livebusjourneytracker.core.domain.model.requiresDisambiguation
-import com.livebusjourneytracker.core.domain.usecase.GetJourneyResultsUseCase
 import com.livebusjourneytracker.core.domain.usecase.GetBusArrivalsUseCase
+import com.livebusjourneytracker.core.domain.usecase.GetJourneyResultsUseCase
+import com.livebusjourneytracker.core.domain.usecase.GetOutboundRouteSequenceUseCase
 import com.livebusjourneytracker.core.domain.usecase.SearchBusRoutesUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,23 +21,70 @@ import kotlinx.coroutines.launch
 class BusRoutesViewModel(
     private val getBusArrivalsUseCase: GetBusArrivalsUseCase,
     private val searchBusRoutesUseCase: SearchBusRoutesUseCase,
-    private val getNearbyStopsUseCase: GetBusArrivalsUseCase,
+    private val getOutboundRouteSequenceUseCase: GetOutboundRouteSequenceUseCase,
     private val getJourneyResultsUseCase: GetJourneyResultsUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(BusRouteContract.BusRoutesUiState())
     val uiState: StateFlow<BusRouteContract.BusRoutesUiState> = _uiState.asStateFlow()
 
-
     fun searchRoutes(query: String) {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true)
+            _uiState.update { it.copy(isLoading = true) }
             try {
                 searchBusRoutesUseCase(query).collect { routes ->
                     _uiState.update {
                         it.copy(
                             isLoading = false,
                             routes = routes
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        error = e.message
+                    )
+                }
+            }
+        }
+    }
+
+    fun fetchLiveBuses(lineId: String) {
+        //TODO Refresh every 30seconds
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            try {
+                getBusArrivalsUseCase(lineId).collect { busArrivals ->
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            busArrivals = busArrivals
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        error = e.message
+                    )
+                }
+            }
+        }
+    }
+
+    fun getOutboundRouteSequence(lineId: String) {
+        //TODO Refresh every 30seconds
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            try {
+                getOutboundRouteSequenceUseCase(lineId).collect { busRouteSequence ->
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            busRouteSequence = busRouteSequence
                         )
                     }
                 }
@@ -73,6 +121,20 @@ class BusRoutesViewModel(
             }
         }
     }
+
+//    private fun matchNapTanId(): List<BusArrival> {
+//        val arrivals: List<BusArrival>? = uiState.value.busArrivals
+//        val busRouteSequence = uiState.value.busRouteSequence
+//        val arrivalsWithCoords = arrivals?.map { arrival ->
+//            val stop = busRouteSequence?.stations?.find { it.id == arrival.naptanId }
+//            if (stop != null) {
+//                arrival.copy(lat = stop.lat, lon = stop.lon)
+//            } else {
+//                arrival
+//            }
+//        } ?: emptyList()
+//        return arrivalsWithCoords
+//    }
 
     private fun handleJourneyResponse(journey: BusJourney?) {
         if (journey == null) {
@@ -148,7 +210,10 @@ class BusRoutesViewModel(
                 clearDisambiguation()
             }
 
-            else -> Unit
+            is BusRouteContract.BusRoutesEvent.FetchLiveBuses -> {
+                fetchLiveBuses(event.lineId)
+
+            }
         }
     }
 
@@ -190,9 +255,9 @@ class BusRoutesViewModel(
         // Use resolved locations for the new journey request
         val fromLocation =
             currentState.selectedFromOption?.parameterValue ?: currentState.fromLocation
-        val toLocation = currentState.selectedToOption?.parameterValue ?: currentState.toLocation
+        val toLocation =
+            currentState.selectedToOption?.parameterValue ?: currentState.toLocation
 
-        // Clear disambiguation state before making new request
         _uiState.update {
             it.copy(
                 requiresDisambiguation = false,

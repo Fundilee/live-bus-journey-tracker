@@ -1,5 +1,6 @@
 package com.livebusjourneytracker.core.data.mapper
 
+import android.util.Log
 import com.livebusjourneytracker.core.data.dto.AdditionalPropertyDto
 import com.livebusjourneytracker.core.data.dto.DisambiguationDto
 import com.livebusjourneytracker.core.data.dto.DisambiguationOptionDto
@@ -15,17 +16,18 @@ import com.livebusjourneytracker.core.domain.model.AdditionalProperty
 import com.livebusjourneytracker.core.domain.model.BusJourney
 import com.livebusjourneytracker.core.domain.model.Disambiguation
 import com.livebusjourneytracker.core.domain.model.DisambiguationOption
-import com.livebusjourneytracker.core.domain.model.Journey
 import com.livebusjourneytracker.core.domain.model.JourneyVector
-import com.livebusjourneytracker.core.domain.model.Leg
+import com.livebusjourneytracker.core.domain.model.Journeys
+import com.livebusjourneytracker.core.domain.model.Legs
 import com.livebusjourneytracker.core.domain.model.Mode
 import com.livebusjourneytracker.core.domain.model.Place
 import com.livebusjourneytracker.core.domain.model.RouteOption
 import com.livebusjourneytracker.core.domain.model.SearchCriteria
 
-object JourneyMapper {
+object BusJourneyMapper {
 
     fun mapToDomain(dto: JourneyResponseDto): BusJourney {
+        Log.d("Mapper is called", dto.journeys.toString())
         return BusJourney(
             toLocationDisambiguation = dto.toLocationDisambiguation?.let {
                 mapDisambiguationToDomain(
@@ -45,8 +47,9 @@ object JourneyMapper {
             recommendedMaxAgeMinutes = dto.recommendedMaxAgeMinutes,
             searchCriteria = dto.searchCriteria?.let { mapSearchCriteriaToDomain(it) },
             journeyVector = dto.journeyVector?.let { mapJourneyVectorToDomain(it) },
-            journey = dto.journey?.let { mapJourneyToDomain(it) }
+            journey = dto.journeys?.let { it -> it.map { mapJourneyToDomain(it) } } ?: emptyList()
         )
+
     }
 
     private fun mapDisambiguationToDomain(dto: DisambiguationDto): Disambiguation {
@@ -70,6 +73,7 @@ object JourneyMapper {
     }
 
     private fun mapModeToDomain(dto: ModeDto): Mode {
+        Log.d("Mapper is called mode", dto.toString())
         return Mode(
             id = dto.id,
             name = dto.name
@@ -77,21 +81,21 @@ object JourneyMapper {
     }
 
     private fun mapRouteOptionToDomain(dto: RouteOptionDto): RouteOption {
+        Log.d("Mapper is called option", dto.toString())
         return RouteOption(
             name = dto.name
         )
     }
 
     private fun mapPlaceToDomain(dto: PlaceDto): Place {
+        Log.d("Mapper is called option", dto.toString())
         return Place(
             naptanId = dto.naptanId,
-            modes = dto.modes,
             icsCode = dto.icsCode,
             stopType = dto.stopType,
             url = dto.url,
             commonName = dto.commonName,
             placeType = dto.placeType,
-            additionalProperties = dto.additionalProperties.map { mapAdditionalPropertyToDomain(it) },
             lat = dto.lat,
             lon = dto.lon
         )
@@ -105,26 +109,30 @@ object JourneyMapper {
         )
     }
 
-    private fun mapLegsToDomain(dto: LegDto): Leg {
-        return Leg(
-            duration = dto.duration,
+    private fun mapLegsToDomain(dto: LegDto): Legs {
+        Log.d("Mapper is called legs", dto.toString())
+        return Legs(
+            duration = dto.duration ?: 0,
             departureTime = dto.departureTime,
             arrivalTime = dto.arrivalTime,
-            departurePoint = dto.departurePoint,
-            arrivalPoint = dto.arrivalPoint,
-            mode = mapModeToDomain(dto.mode),
-            routeOption = mapRouteOptionToDomain(dto.routeOption),
+            departurePoint = mapPlaceToDomain(dto.departurePoint),
+            arrivalPoint = mapPlaceToDomain(dto.arrivalPoint),
+            mode = dto.mode?.let { mapModeToDomain(it) },
+            routeOptions = dto.routeOptions?.let { mapRouteOptionToDomain(it) },
             lineId = dto.lineId
         )
     }
 
-    private fun mapJourneyToDomain(dto: JourneyDto): Journey {
-        return Journey(
+    private fun mapJourneyToDomain(dto: JourneyDto): Journeys {
+        Log.d("Mapper is called2", dto.toString())
+
+        return Journeys(
             startDateTime = dto.startDateTime,
             arrivalDateTime = dto.arrivalDateTime,
             duration = dto.duration,
-            legs = dto.legs.filter { it -> "bus" in it.mode.id }.map { mapLegsToDomain(it) }
+            legs = dto.legs.map { mapLegsToDomain(it) },
         )
+
     }
 
     private fun mapSearchCriteriaToDomain(dto: SearchCriteriaDto): SearchCriteria {
