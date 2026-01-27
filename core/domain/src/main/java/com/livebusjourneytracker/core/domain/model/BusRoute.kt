@@ -8,7 +8,8 @@ data class BusRoute(
     val lineStatuses: List<LineStatus> = emptyList(),
     val routeSections: List<RouteSection> = emptyList(),
     val serviceTypes: List<ServiceType> = emptyList(),
-    val stations:  List<Stations> = emptyList()
+    val stations:  List<Stations> = emptyList(),
+    val lines: List<String> = emptyList()
 )
 
 data class LineStatus(

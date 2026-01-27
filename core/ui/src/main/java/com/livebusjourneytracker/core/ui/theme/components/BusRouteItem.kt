@@ -14,7 +14,7 @@ fun BusRouteItem(
     modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier.padding(16.dp)
+        modifier = modifier.padding(11.dp)
     ) {
         Text(
             text = value,
