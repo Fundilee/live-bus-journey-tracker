@@ -10,8 +10,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -21,8 +24,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Clear
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -39,12 +40,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.livebusjourneytracker.core.domain.model.BusRoute
 import com.livebusjourneytracker.core.ui.theme.components.BottomSheetView
 import com.livebusjourneytracker.core.ui.theme.components.BusRouteItem
 import com.livebusjourneytracker.core.ui.theme.components.SearchView
-import com.livebusjourneytracker.core.ui.theme.components.SearchResultsSkeleton
-import com.livebusjourneytracker.feature.busroutes.ui.BusRouteContract
 import com.livebusjourneytracker.feature.busroutes.R
 import org.koin.androidx.compose.koinViewModel
 
@@ -60,7 +58,6 @@ fun LandingScreen(
     var fromQuery by remember { mutableStateOf("") }
     var toQuery by remember { mutableStateOf("") }
     var isMapView by remember { mutableStateOf(false) }
-    var selectedRoute by remember { mutableStateOf<BusRoute?>(null) }
     var isSearchActive by remember { mutableStateOf(false) }
     val fromFocus = remember { FocusRequester() }
     val toFocus = remember { FocusRequester() }
@@ -68,6 +65,8 @@ fun LandingScreen(
     uiState.journey?.let { journey ->
         BottomSheetView(
             journey = journey,
+            selectedFromOption = uiState.selectedFromOption,
+            selectedToOption = uiState.selectedToOption,
             onDisambiguationSelected = { type, option ->
                 viewModel.setEvents(
                     BusRouteContract.BusRoutesEvent.SelectDisambiguationOption(
@@ -94,10 +93,12 @@ fun LandingScreen(
                 fromFocus.requestFocus()
                 isSearchActive = true
             }
+
             BusRouteContract.ActiveSearchField.TO -> {
                 toFocus.requestFocus()
                 isSearchActive = true
             }
+
             BusRouteContract.ActiveSearchField.NONE -> Unit
         }
     }
@@ -116,7 +117,7 @@ fun LandingScreen(
             }
         }
     }
-    
+
     LaunchedEffect(lifecycleOwner.lifecycle) {
         lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.CREATED) {
             viewModel.stopBusTracking()
@@ -137,7 +138,7 @@ fun LandingScreen(
                 text = stringResource(R.string.bus_routes),
                 style = MaterialTheme.typography.headlineMedium
             )
-            
+
             IconButton(
                 onClick = {
                     // Reset everything to initial state
@@ -147,7 +148,6 @@ fun LandingScreen(
                     toQuery = ""
                     isMapView = false
                     isSearchActive = false
-                    selectedRoute = null
                 }
             ) {
                 Icon(
@@ -188,7 +188,7 @@ fun LandingScreen(
             value = toQuery,
             onFromFieldFocused = {
                 viewModel.updateFieldFocus(BusRouteContract.ActiveSearchField.TO)
-                isSearchActive = true 
+                isSearchActive = true
             },
             onSearch = {
                 toQuery = it
@@ -216,23 +216,60 @@ fun LandingScreen(
             uiState.error != null -> {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
+                    colors = CardDefaults.cardColors(
+                        MaterialTheme.colorScheme.errorContainer
+                    )
                 ) {
                     Column(
-                        modifier = Modifier.padding(16.dp)
+                        modifier = Modifier.padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = stringResource(R.string.error, uiState.error.orEmpty()),
-                            color = MaterialTheme.colorScheme.onErrorContainer,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth()
+                            text = if (uiState.networkError) stringResource(R.string.connection_issue) else stringResource(
+                                R.string.error
+                            ),
+                            style = MaterialTheme.typography.titleMedium,
+                            color =
+                                MaterialTheme.colorScheme.onErrorContainer
                         )
                         Spacer(modifier = Modifier.height(8.dp))
-                        Button(
-                            onClick = { viewModel.clearError() },
-                            modifier = Modifier.align(Alignment.CenterHorizontally)
+
+                        Text(
+                            text = uiState.error.toString(),
+                            color = if (uiState.networkError)
+                                MaterialTheme.colorScheme.onPrimaryContainer
+                            else
+                                MaterialTheme.colorScheme.onErrorContainer,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth(),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Text(stringResource(R.string.retry))
+                            Button(
+                                onClick = { viewModel.retryLastOperation() },
+                                enabled = !uiState.isRetrying
+                            ) {
+                                if (uiState.isRetrying) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(16.dp),
+                                        strokeWidth = 2.dp
+                                    )
+                                } else {
+                                    Text("Retry")
+                                }
+                            }
+
+                            Button(
+                                onClick = { viewModel.clearError() },
+                                enabled = !uiState.isRetrying
+                            ) {
+                                Text("Dismiss")
+                            }
                         }
                     }
                 }
@@ -254,9 +291,11 @@ fun LandingScreen(
                                                     BusRouteContract.ActiveSearchField.FROM -> {
                                                         fromQuery = route.name
                                                     }
+
                                                     BusRouteContract.ActiveSearchField.TO -> {
                                                         toQuery = route.name
                                                     }
+
                                                     else -> {}
                                                 }
 
@@ -298,26 +337,11 @@ fun LandingScreen(
                         (isMapView || uiState.busArrivals?.isNotEmpty() == true) && !isSearchActive -> {
                             BusRoutesMapView(
                                 routes = uiState.busArrivals,
-                                stops = uiState.nearbyStops,
-                                busRoute = uiState.busRouteSequence,
                                 busArrival = uiState.fromCoordinates,
                                 busDeparture = uiState.toCoordinates,
                                 lines = uiState.lines,
                                 modifier = Modifier.fillMaxSize(),
-                                onRouteSelected = { route ->
-                                    selectedRoute = route
-                                },
-                                onStopSelected = { stop ->
-                                }
                             )
-
-                            selectedRoute?.let { route ->
-//                                BusRouteInfoCard(
-//                                    route = route,
-//                                    modifier = Modifier.align(Alignment.BottomCenter),
-//                                    onDismiss = { selectedRoute = null }
-//                                )
-                            }
                         }
 
                         else -> {

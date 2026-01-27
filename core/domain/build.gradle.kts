@@ -33,8 +33,10 @@ android {
 }
 
 dependencies {
-    implementation(project(":common"))
-    
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.koin.android)
+    implementation(libs.koin.androidx.compose)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

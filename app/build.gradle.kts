@@ -54,13 +54,10 @@ android {
 
 dependencies {
     // Module dependencies
-    implementation(project(":common"))
     implementation(project(":core:ui"))
     implementation(project(":core:network"))
-    implementation(project(":feature:home"))
     implementation(project(":feature:busroutes"))
-    implementation(project(":feature:tracking"))
-    
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

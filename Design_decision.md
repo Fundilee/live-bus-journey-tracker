@@ -1,5 +1,5 @@
 
-### How did you infer vehicle position from the available data?
+### 1. How did you infer vehicle position from the available data?
 
 **Data Sources:**
 - **Bus Arrivals API**: Provides real-time `timeToStation` (seconds) and `naptanId` for each bus
@@ -210,10 +210,4 @@ if (!routeSequenceCache.containsKey(lineId)) {
 - Map camera animations
 
 ## 5. Scaling Considerations
-
-**Current Client-Side Approach:**
-   kotlin
-val enrichedArrivals = arrivals.map { arrival ->
-    val stop = cachedRoute.stations?.find { it.id == arrival.naptanId }
-    arrival.copy(lat = stop.lat, lon = stop.lon)
-}
+????

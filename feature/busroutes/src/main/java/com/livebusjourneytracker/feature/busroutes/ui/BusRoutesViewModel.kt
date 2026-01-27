@@ -12,7 +12,6 @@ import com.livebusjourneytracker.core.domain.model.requiresDisambiguation
 import com.livebusjourneytracker.core.domain.usecase.GetBusArrivalsUseCase
 import com.livebusjourneytracker.core.domain.usecase.GetJourneyResultsUseCase
 import com.livebusjourneytracker.core.domain.usecase.SearchBusRoutesUseCase
-import com.livebusjourneytracker.feature.busroutes.ui.BusRouteContract
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -82,10 +81,18 @@ class BusRoutesViewModel(
                     }
                 }
             } catch (e: Exception) {
+                val isNetworkError = e is java.net.UnknownHostException || 
+                                   e is java.net.SocketTimeoutException ||
+                                   e is java.io.IOException
+                
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        error = e.message
+                        error = when {
+                            isNetworkError -> "Network connection error. Please check your internet connection."
+                            else -> e.message ?: "An unexpected error occurred"
+                        },
+                        networkError = isNetworkError
                     )
                 }
             }
@@ -168,7 +175,25 @@ class BusRoutesViewModel(
 
     fun clearError() {
         _uiState.update {
-            it.copy(error = null)
+            it.copy(error = null, networkError = false)
+        }
+    }
+    
+    fun retryLastOperation() {
+        _uiState.update { it.copy(isRetrying = true, error = null, networkError = false) }
+        
+        // Retry based on current state
+        val currentState = _uiState.value
+        when {
+            currentState.currentTrackingLineId != null -> {
+                fetchLiveBuses(currentState.currentTrackingLineId)
+            }
+            currentState.fromLocation.isNotBlank() && currentState.toLocation.isNotBlank() -> {
+                planJourney()
+            }
+            else -> {
+                _uiState.update { it.copy(isRetrying = false) }
+            }
         }
     }
 

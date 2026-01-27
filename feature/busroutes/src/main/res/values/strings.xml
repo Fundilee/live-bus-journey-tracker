@@ -11,4 +11,6 @@
     <string name="arrival_time">Arrival Time: %1$s</string>
     <string name="plan_your_journey">Plan your journey</string>
     <string name="search_for_bus_stops_or_enter_locations">Search for bus stops\n</string>
+    <string name="connection_issue">Connection Issue</string>
+    <string name="journey_destination">Journey destination</string>
 </resources>
