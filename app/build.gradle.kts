@@ -24,6 +24,8 @@ android {
         debug {
             buildConfigField("String", "TFL_API_KEY", "\"${project.findProperty("TFL_API_KEY") ?: ""}\"")
             buildConfigField("String", "BASE_URL", "\"https://api.tfl.gov.uk/\"")
+            buildConfigField("String", "MAPS_API_KEY", "\"${project.findProperty("MAPS_API_KEY") ?: ""}\"")
+            manifestPlaceholders["MAPS_API_KEY"] = project.findProperty("MAPS_API_KEY") ?: ""
         }
         release {
             isMinifyEnabled = false
