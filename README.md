@@ -1,5 +1,10 @@
 # Live Bus Journey Tracker
 
+# App setup "api key configuration"
+ - Create a secrets.properties file add your maps and tfl api keys then you good to go.
+   
+   <img width="1013" height="56" alt="Screenshot 2026-01-28 at 15 18 53" src="https://github.com/user-attachments/assets/574efa67-dc0a-47b5-a8bc-bdf13e4373b2" />
+
 ## Architecture Overview
 
 A clean architecture Android app with three main layers:
