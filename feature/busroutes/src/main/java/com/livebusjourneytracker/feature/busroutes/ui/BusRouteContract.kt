@@ -31,6 +31,7 @@ class BusRouteContract {
         val journey: BusJourney? = null,
         val error: String? = null,
         val networkError: Boolean = false,
+        val rateLimitError: Boolean = false,
         val isRetrying: Boolean = false,
         val fromLocation: String = "",
         val toLocation: String = "",

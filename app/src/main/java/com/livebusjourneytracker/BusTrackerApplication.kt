@@ -1,6 +1,7 @@
 package com.livebusjourneytracker
 
 import android.app.Application
+import com.livebusjourneytracker.core.data.di.dataModule
 import com.livebusjourneytracker.core.network.networkModule
 import com.livebusjourneytracker.di.appModule
 import com.livebusjourneytracker.feature.busroutes.di.busRoutesModule
@@ -19,6 +20,7 @@ class BusTrackerApplication : Application() {
             modules(
                 appModule,
                 networkModule,
+                dataModule,
                 busRoutesModule
             )
         }

@@ -1,4 +1,4 @@
-package com.livebusjourneytracker.core.data.dto
+package com.livebusjourneytracker.core.network.dto
 
 import com.google.gson.annotations.SerializedName
 

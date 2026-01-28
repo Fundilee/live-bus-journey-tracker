@@ -1,6 +1,6 @@
 package com.livebusjourneytracker.core.data.mapper
 
-import com.livebusjourneytracker.core.data.dto.BusArrivalDto
+import com.livebusjourneytracker.core.network.dto.BusArrivalDto
 import com.livebusjourneytracker.core.domain.model.BusArrival
 
 object BusArrivalMapper {

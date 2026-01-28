@@ -1,9 +1,9 @@
-package com.livebusjourneytracker.core.data.api
+package com.livebusjourneytracker.core.network
 
-import com.livebusjourneytracker.core.data.dto.BusArrivalDto
-import com.livebusjourneytracker.core.data.dto.BusRouteDto
-import com.livebusjourneytracker.core.data.dto.JourneyResponseDto
-import com.livebusjourneytracker.core.data.dto.SearchResponseDto
+import com.livebusjourneytracker.core.network.dto.BusArrivalDto
+import com.livebusjourneytracker.core.network.dto.BusRouteDto
+import com.livebusjourneytracker.core.network.dto.JourneyResponseDto
+import com.livebusjourneytracker.core.network.dto.SearchResponseDto
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path

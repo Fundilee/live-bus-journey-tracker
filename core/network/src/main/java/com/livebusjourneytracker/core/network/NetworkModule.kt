@@ -37,4 +37,8 @@ val networkModule = module {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
+    
+    single<TflApiService> {
+        get<Retrofit>().create(TflApiService::class.java)
+    }
 }

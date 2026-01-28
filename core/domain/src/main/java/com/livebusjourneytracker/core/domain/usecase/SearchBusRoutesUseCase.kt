@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 class SearchBusRoutesUseCase(
     private val repository: BusRoutesRepository
 ) {
-    suspend operator fun invoke(query: String): Flow<List<BusRoute>> {
+    suspend operator fun invoke(query: String): Flow<Result<List<BusRoute>>> {
         return repository.searchBusRoutes(query.trim())
     }
 }

@@ -7,9 +7,9 @@ import kotlinx.coroutines.flow.Flow
 
 interface BusRoutesRepository {
 
-    suspend fun searchBusRoutes(query: String): Flow<List<BusRoute>>
+    suspend fun searchBusRoutes(query: String): Flow<Result<List<BusRoute>>>
 
-    suspend fun planJourney(from: String, to: String): Flow<BusJourney?>
+    suspend fun planJourney(from: String, to: String): Flow<Result<BusJourney?>>
 
-    suspend fun getBusArrivalsById(lineId: String): Flow<List<BusArrival>>
+    suspend fun getBusArrivalsById(lineId: String): Flow<Result<List<BusArrival>>>
 }

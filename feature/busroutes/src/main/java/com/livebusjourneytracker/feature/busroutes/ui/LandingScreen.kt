@@ -43,6 +43,13 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.livebusjourneytracker.core.ui.theme.components.BottomSheetView
 import com.livebusjourneytracker.core.ui.theme.components.BusRouteItem
 import com.livebusjourneytracker.core.ui.theme.components.SearchView
+import com.livebusjourneytracker.core.ui.theme.components.JourneyPlanningLoadingState
+import com.livebusjourneytracker.core.ui.theme.components.BusTrackingLoadingState
+import com.livebusjourneytracker.core.ui.theme.components.NoSearchResultsState
+import com.livebusjourneytracker.core.ui.theme.components.NoBusArrivalsState
+import com.livebusjourneytracker.core.ui.theme.components.NoJourneyFoundState
+import com.livebusjourneytracker.core.ui.theme.warningContainer
+import com.livebusjourneytracker.core.ui.theme.onWarningContainer
 import com.livebusjourneytracker.feature.busroutes.R
 import org.koin.androidx.compose.koinViewModel
 
@@ -204,20 +211,27 @@ fun LandingScreen(
 
 
         when {
+            uiState.isLoadingJourney -> {
+                JourneyPlanningLoadingState(
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+            
             uiState.isLoading -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
+                BusTrackingLoadingState(
+                    modifier = Modifier.fillMaxSize()
+                )
             }
 
             uiState.error != null -> {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
-                        MaterialTheme.colorScheme.errorContainer
+                        when {
+                            uiState.rateLimitError -> MaterialTheme.colorScheme.warningContainer
+                            uiState.networkError -> MaterialTheme.colorScheme.primaryContainer
+                            else -> MaterialTheme.colorScheme.errorContainer
+                        }
                     )
                 ) {
                     Column(
@@ -225,21 +239,27 @@ fun LandingScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = if (uiState.networkError) stringResource(R.string.connection_issue) else stringResource(
-                                R.string.error
-                            ),
+                            text = when {
+                                uiState.rateLimitError -> "Rate Limit Reached"
+                                uiState.networkError -> stringResource(R.string.connection_issue)
+                                else -> stringResource(R.string.error)
+                            },
                             style = MaterialTheme.typography.titleMedium,
-                            color =
-                                MaterialTheme.colorScheme.onErrorContainer
+                            color = when {
+                                uiState.rateLimitError -> MaterialTheme.colorScheme.onWarningContainer
+                                uiState.networkError -> MaterialTheme.colorScheme.onPrimaryContainer
+                                else -> MaterialTheme.colorScheme.onErrorContainer
+                            }
                         )
                         Spacer(modifier = Modifier.height(8.dp))
 
                         Text(
                             text = uiState.error.toString(),
-                            color = if (uiState.networkError)
-                                MaterialTheme.colorScheme.onPrimaryContainer
-                            else
-                                MaterialTheme.colorScheme.onErrorContainer,
+                            color = when {
+                                uiState.rateLimitError -> MaterialTheme.colorScheme.onWarningContainer
+                                uiState.networkError -> MaterialTheme.colorScheme.onPrimaryContainer
+                                else -> MaterialTheme.colorScheme.onErrorContainer
+                            },
                             textAlign = TextAlign.Center,
                             modifier = Modifier.fillMaxWidth(),
                             style = MaterialTheme.typography.bodyMedium
@@ -250,17 +270,19 @@ fun LandingScreen(
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Button(
-                                onClick = { viewModel.retryLastOperation() },
-                                enabled = !uiState.isRetrying
-                            ) {
-                                if (uiState.isRetrying) {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier.size(16.dp),
-                                        strokeWidth = 2.dp
-                                    )
-                                } else {
-                                    Text("Retry")
+                            if (!uiState.rateLimitError) {
+                                Button(
+                                    onClick = { viewModel.retryLastOperation() },
+                                    enabled = !uiState.isRetrying
+                                ) {
+                                    if (uiState.isRetrying) {
+                                        CircularProgressIndicator(
+                                            modifier = Modifier.size(16.dp),
+                                            strokeWidth = 2.dp
+                                        )
+                                    } else {
+                                        Text("Retry")
+                                    }
                                 }
                             }
 
@@ -319,15 +341,10 @@ fun LandingScreen(
 
                                 if (uiState.routes.isEmpty() && searchQuery.isNotBlank()) {
                                     item {
-                                        Text(
-                                            text = stringResource(
-                                                R.string.no_routes_found_for,
-                                                searchQuery
-                                            ),
-                                            modifier = Modifier.padding(16.dp),
-                                            textAlign = TextAlign.Center,
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        NoSearchResultsState(
+                                            searchQuery = searchQuery,
+                                            onRetrySearch = { viewModel.searchRoutes(searchQuery) },
+                                            modifier = Modifier.fillMaxWidth()
                                         )
                                     }
                                 }
@@ -335,15 +352,38 @@ fun LandingScreen(
                         }
 
                         (isMapView || uiState.busArrivals?.isNotEmpty() == true) && !isSearchActive -> {
-                            BusRoutesMapView(
-                                routes = uiState.busArrivals,
-                                busArrival = uiState.fromCoordinates,
-                                busDeparture = uiState.toCoordinates,
-                                lines = uiState.lines,
-                                modifier = Modifier.fillMaxSize(),
-                            )
+                            if (uiState.busArrivals?.isEmpty() == true) {
+                                NoBusArrivalsState(
+                                    lineId = uiState.currentTrackingLineId,
+                                    onRetry = { 
+                                        uiState.currentTrackingLineId?.let { lineId ->
+                                            viewModel.fetchLiveBuses(lineId)
+                                        }
+                                    },
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                            } else {
+                                BusRoutesMapView(
+                                    routes = uiState.busArrivals,
+                                    busArrival = uiState.fromCoordinates,
+                                    busDeparture = uiState.toCoordinates,
+                                    lines = uiState.lines,
+                                    modifier = Modifier.fillMaxSize(),
+                                )
+                            }
                         }
 
+                        uiState.journey == null && fromQuery.isNotBlank() && toQuery.isNotBlank() -> {
+                            NoJourneyFoundState(
+                                fromLocation = fromQuery.takeIf { it.isNotBlank() },
+                                toLocation = toQuery.takeIf { it.isNotBlank() },
+                                onRetry = {
+                                    viewModel.clearError()
+                                },
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
+                        
                         else -> {
                             Column(
                                 modifier = Modifier

@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 class GetJourneyResultsUseCase(
     private val repository: BusRoutesRepository
 ) {
-    suspend operator fun invoke(from: String, to: String): Flow<BusJourney?> {
+    suspend operator fun invoke(from: String, to: String): Flow<Result<BusJourney?>> {
         require(from.isNotBlank()) { "From location cannot be empty" }
         require(to.isNotBlank()) { "To location cannot be empty" }
         

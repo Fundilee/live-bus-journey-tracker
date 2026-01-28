@@ -3,7 +3,7 @@
     <string name="bus_routes">Bus Routes</string>
     <string name="list_view">List View</string>
     <string name="map_view">Map View</string>
-    <string name="error">Error: %1$s</string>
+    <string name="error">Error</string>
     <string name="retry">Retry</string>
     <string name="no_routes_found_for">No routes found for \'%1$s\'</string>
     <string name="no_bus_routes_available">No bus routes available</string>
