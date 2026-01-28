@@ -1,5 +1,6 @@
 package com.livebusjourneytracker.feature.busroutes.ui
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.livebusjourneytracker.core.domain.model.BusJourney
@@ -12,7 +13,6 @@ import com.livebusjourneytracker.core.domain.model.requiresDisambiguation
 import com.livebusjourneytracker.core.domain.usecase.GetBusArrivalsUseCase
 import com.livebusjourneytracker.core.domain.usecase.GetJourneyResultsUseCase
 import com.livebusjourneytracker.core.domain.usecase.SearchBusRoutesUseCase
-import com.livebusjourneytracker.feature.busroutes.ui.BusRouteContract
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -35,22 +35,28 @@ class BusRoutesViewModel(
     fun searchRoutes(query: String) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            try {
-                searchBusRoutesUseCase(query).collect { routes ->
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            routes = routes
-                        )
+            searchBusRoutesUseCase(query).collect { result ->
+                result.fold(
+                    onSuccess = { routes ->
+                        _uiState.update {
+                            it.copy(
+                                isLoading = false,
+                                routes = routes,
+                                error = null,
+                            )
+                        }
+                    },
+                    onFailure = { exception ->
+                        Log.d("Thrown exception is", exception.message.toString())
+                        _uiState.update {
+                            it.copy(
+                                isLoading = false,
+                                routes = emptyList(),
+                                error = exception.message
+                            )
+                        }
                     }
-                }
-            } catch (e: Exception) {
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        error = e.message
-                    )
-                }
+                )
             }
         }
     }
@@ -58,36 +64,40 @@ class BusRoutesViewModel(
     fun fetchLiveBuses(lineId: String) {
         busTrackingJob?.cancel()
 
-        // Store the lineId for resuming after background
         _uiState.update { it.copy(currentTrackingLineId = lineId) }
 
         busTrackingJob = viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            try {
-                getBusArrivalsUseCase(lineId).collect { busArrivals ->
-                    val lines: List<List<BusRouteContract.BusCoordinates>> =
-                        busArrivals.flatMap { it.lines }
-                            .map { line ->
-                                parseLineString(line)
-                            }
-                            .filter { it.isNotEmpty() }
+            getBusArrivalsUseCase(lineId).collect { result ->
+                result.fold(
+                    onSuccess = { busArrivals ->
+                        val lines: List<List<BusRouteContract.BusCoordinates>> =
+                            busArrivals.flatMap { it.lines }
+                                .map { line ->
+                                    parseLineString(line)
+                                }
+                                .filter { it.isNotEmpty() }
 
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            isBusArrivalSuccess = true,
-                            busArrivals = busArrivals,
-                            lines = lines
-                        )
+                        _uiState.update {
+                            it.copy(
+                                isLoading = false,
+                                isBusArrivalSuccess = true,
+                                busArrivals = busArrivals,
+                                lines = lines,
+                                error = null,
+                            )
+                        }
+                    },
+                    onFailure = { exception ->
+                        _uiState.update {
+                            it.copy(
+                                isLoading = false,
+                                busArrivals = emptyList(),
+                                error = exception.message
+                            )
+                        }
                     }
-                }
-            } catch (e: Exception) {
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        error = e.message
-                    )
-                }
+                )
             }
         }
     }
@@ -102,7 +112,6 @@ class BusRoutesViewModel(
     fun stopBusTracking() {
         busTrackingJob?.cancel()
         busTrackingJob = null
-        // Don't clear cache here - only pause tracking, cache preserved for resume
     }
 
     private fun planJourney() {
@@ -110,20 +119,24 @@ class BusRoutesViewModel(
         val to = uiState.value.toLocation
         if (from.isBlank() || to.isBlank()) return
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoadingJourney = true,) }
-            try {
-                getJourneyResultsUseCase.invoke(from = from, to = to)
-                    .collect { journey ->
-                        handleJourneyResponse(journey)
-                    }
-                println("Journey planned from '$from' to '$to'")
-            } catch (e: Exception) {
-                _uiState.update {
-                    it.copy(
-                        error = "Failed to plan journey: ${e.message}",
+            _uiState.update { it.copy(isLoadingJourney = true) }
+            getJourneyResultsUseCase.invoke(from = from, to = to)
+                .collect { result ->
+                    result.fold(
+                        onSuccess = { journey ->
+                            handleJourneyResponse(journey)
+                        },
+                        onFailure = { exception ->
+                            _uiState.update {
+                                it.copy(
+                                    isLoadingJourney = false,
+                                    journey = null,
+                                    error = exception.message
+                                )
+                            }
+                        }
                     )
                 }
-            }
         }
     }
 
@@ -131,7 +144,7 @@ class BusRoutesViewModel(
         if (journey == null) {
             _uiState.update {
                 it.copy(
-                    isLoading = false,
+                    isLoadingJourney = false,
                     error = "No journey found",
                 )
             }
@@ -142,7 +155,7 @@ class BusRoutesViewModel(
             val disambiguationTypes = journey.getDisambiguationNeeded()
             _uiState.update {
                 it.copy(
-                    isLoading = false,
+                    isLoadingJourney = false,
                     journey = journey,
                     requiresDisambiguation = true,
                     disambiguationTypes = disambiguationTypes,
@@ -157,7 +170,7 @@ class BusRoutesViewModel(
         } else {
             _uiState.update {
                 it.copy(
-                    isLoading = false,
+                    isLoadingJourney = false,
                     journey = journey,
                     journeyPlanned = true,
                 )
@@ -168,7 +181,33 @@ class BusRoutesViewModel(
 
     fun clearError() {
         _uiState.update {
-            it.copy(error = null)
+            it.copy(error = null, networkError = false, rateLimitError = false)
+        }
+    }
+
+    fun retryLastOperation() {
+        _uiState.update {
+            it.copy(
+                isRetrying = true,
+                error = null,
+                networkError = false,
+                rateLimitError = false
+            )
+        }
+
+        val currentState = _uiState.value
+        when {
+            currentState.currentTrackingLineId != null -> {
+                fetchLiveBuses(currentState.currentTrackingLineId)
+            }
+
+            currentState.fromLocation.isNotBlank() && currentState.toLocation.isNotBlank() -> {
+                planJourney()
+            }
+
+            else -> {
+                _uiState.update { it.copy(isRetrying = false) }
+            }
         }
     }
 
@@ -192,15 +231,13 @@ class BusRoutesViewModel(
             )
         }
     }
-    
+
     fun resetToInitialState() {
-        // Stop any active tracking
         busTrackingJob?.cancel()
         busTrackingJob = null
-        
-        // Reset UI state to initial values
+
         _uiState.update {
-            BusRouteContract.BusRoutesUiState() // Reset to default empty state
+            BusRouteContract.BusRoutesUiState()
         }
         clearJourney()
         clearDisambiguation()
@@ -209,11 +246,11 @@ class BusRoutesViewModel(
     fun setEvents(event: BusRouteContract.BusRoutesEvent) {
         when (event) {
             is BusRouteContract.BusRoutesEvent.UpdateFromLocation -> {
-                _uiState.update { it.copy(fromLocation = event.fromLocation,) }
+                _uiState.update { it.copy(fromLocation = event.fromLocation) }
             }
 
             is BusRouteContract.BusRoutesEvent.UpdateToLocation -> {
-                _uiState.update { it.copy(toLocation = event.toLocation,) }
+                _uiState.update { it.copy(toLocation = event.toLocation) }
             }
 
             is BusRouteContract.BusRoutesEvent.UpdateSelectedDestination -> {
@@ -289,9 +326,9 @@ class BusRoutesViewModel(
     ) {
         _uiState.update { currentState ->
             when (type) {
-                DisambiguationType.FROM -> currentState.copy(selectedFromOption = option,)
-                DisambiguationType.TO -> currentState.copy(selectedToOption = option,)
-                DisambiguationType.VIA -> currentState.copy(selectedViaOption = option,)
+                DisambiguationType.FROM -> currentState.copy(selectedFromOption = option)
+                DisambiguationType.TO -> currentState.copy(selectedToOption = option)
+                DisambiguationType.VIA -> currentState.copy(selectedViaOption = option)
             }
         }
     }

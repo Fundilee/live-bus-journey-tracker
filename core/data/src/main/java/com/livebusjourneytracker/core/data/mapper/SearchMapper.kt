@@ -1,6 +1,6 @@
 package com.livebusjourneytracker.core.data.mapper
 
-import com.livebusjourneytracker.core.data.dto.MatchedStopDto
+import com.livebusjourneytracker.core.network.dto.MatchedStopDto
 import com.livebusjourneytracker.core.domain.model.BusRoute
 
 object SearchMapper {

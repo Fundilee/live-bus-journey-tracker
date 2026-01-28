@@ -1,8 +1,8 @@
 package com.livebusjourneytracker.core.data.mapper
 
-import com.livebusjourneytracker.core.data.dto.BusLineDto
-import com.livebusjourneytracker.core.data.dto.BusStopDto
-import com.livebusjourneytracker.core.data.dto.StopPointDto
+import com.livebusjourneytracker.core.network.dto.BusLineDto
+import com.livebusjourneytracker.core.network.dto.BusStopDto
+import com.livebusjourneytracker.core.network.dto.StopPointDto
 import com.livebusjourneytracker.core.domain.model.BusLine
 import com.livebusjourneytracker.core.domain.model.BusStop
 import com.livebusjourneytracker.core.domain.model.StopPoint

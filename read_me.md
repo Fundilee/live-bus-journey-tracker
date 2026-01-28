@@ -1,5 +1,34 @@
+# Live Bus Journey Tracker
 
-### How did you infer vehicle position from the available data?
+## Architecture Overview
+
+A clean architecture Android app with three main layers:
+
+**UI Layer (Compose)**
+- MVVM pattern with StateFlow
+- Material Design 3 components
+- Loading, empty, and error states
+
+**Domain Layer (Business Logic)**
+- Use cases for business operations
+- Repository interfaces
+- Result<T> pattern for error handling
+
+**Data Layer**
+- Repository with API integration
+- Retrofit for network calls
+- Flow-based reactive streams
+
+**Key Features:**
+- Real-time bus tracking with 30s polling
+- Journey planning with disambiguation
+- Lifecycle-aware background handling
+- Functional error handling (no exceptions)
+- Modular structure for scalability
+
+---
+
+### 1. How did you infer vehicle position from the available data?
 
 **Data Sources:**
 - **Bus Arrivals API**: Provides real-time `timeToStation` (seconds) and `naptanId` for each bus
@@ -209,11 +238,31 @@ if (!routeSequenceCache.containsKey(lineId)) {
 - Cache optimization for performance
 - Map camera animations
 
-## 5. Scaling Considerations
+## API Key Implementation
 
-**Current Client-Side Approach:**
-   kotlin
-val enrichedArrivals = arrivals.map { arrival ->
-    val stop = cachedRoute.stations?.find { it.id == arrival.naptanId }
-    arrival.copy(lat = stop.lat, lon = stop.lon)
+The TfL API key is automatically added to all requests using an OkHttp interceptor:
+
+```kotlin
+class ApiKeyInterceptor(private val apiKey: String) : Interceptor {
+    override fun intercept(chain: Interceptor.Chain): Response {
+        val original = chain.request()
+        val url = original.url.newBuilder()
+            .addQueryParameter("app_key", apiKey) 
+            .build()
+            
+        val request = original.newBuilder().url(url).build()
+        return chain.proceed(request)
+    }
 }
+```
+
+ *How it works:*
+1. Interceptor automatically adds `app_key` query parameter to every API request
+2. API key is injected via dependency injection (Koin)
+3. All endpoints like `/Line/bus/Arrivals` become `/Line/bus/Arrivals?app_key=YOUR_KEY`
+4. No need to manually add the key to each API call
+
+**Configuration:**
+- API key provided through DI module
+- Secure storage recommended for production apps
+- Interceptor ensures consistent authentication across all requests

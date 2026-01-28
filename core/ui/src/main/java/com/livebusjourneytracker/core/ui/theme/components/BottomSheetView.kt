@@ -39,6 +39,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun BottomSheetView(
     journey: BusJourney,
+    selectedFromOption: DisambiguationOption? = null,
+    selectedToOption: DisambiguationOption? = null,
     onDisambiguationSelected: (DisambiguationType, DisambiguationOption) -> Unit = { _, _ -> },
     onRetryJourney: () -> Unit = {},
     onDismiss: () -> Unit = {},
@@ -80,6 +82,8 @@ fun BottomSheetView(
             if (journey.requiresDisambiguation()) {
                 DisambiguationContent(
                     journey = journey,
+                    selectedFromOption = selectedFromOption,
+                    selectedToOption = selectedToOption,
                     onDisambiguationSelected = onDisambiguationSelected,
                     onRetryJourney = onRetryJourney
                 )
@@ -98,6 +102,8 @@ fun BottomSheetView(
 @Composable
 private fun DisambiguationContent(
     journey: BusJourney,
+    selectedFromOption: DisambiguationOption? = null,
+    selectedToOption: DisambiguationOption? = null,
     onDisambiguationSelected: (DisambiguationType, DisambiguationOption) -> Unit,
     onRetryJourney: () -> Unit
 ) {
@@ -126,6 +132,7 @@ private fun DisambiguationContent(
                 items(disambiguation.disambiguationOptions) { option ->
                     DisambiguationOptionItem(
                         option = option,
+                        isSelected = selectedFromOption?.place?.commonName == option.place.commonName,
                         onClick = { onDisambiguationSelected(DisambiguationType.FROM, option) }
                     )
                 }
@@ -144,6 +151,7 @@ private fun DisambiguationContent(
                 items(disambiguation.disambiguationOptions) { option ->
                     DisambiguationOptionItem(
                         option = option,
+                        isSelected = selectedToOption?.place?.commonName == option.place.commonName,
                         onClick = { onDisambiguationSelected(DisambiguationType.TO, option) }
                     )
                 }
@@ -166,6 +174,7 @@ private fun DisambiguationContent(
 @Composable
 private fun DisambiguationOptionItem(
     option: DisambiguationOption,
+    isSelected: Boolean = false,
     onClick: () -> Unit
 ) {
     Card(
@@ -174,7 +183,13 @@ private fun DisambiguationOptionItem(
             .padding(vertical = 4.dp)
             .clip(RoundedCornerShape(5.dp))
             .clickable { onClick() },
-        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isSelected) 
+                MaterialTheme.colorScheme.primaryContainer 
+            else 
+                MaterialTheme.colorScheme.surface
+        )
     ) {
         Column(
             modifier = Modifier

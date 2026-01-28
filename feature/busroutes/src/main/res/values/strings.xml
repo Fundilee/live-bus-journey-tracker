@@ -3,7 +3,7 @@
     <string name="bus_routes">Bus Routes</string>
     <string name="list_view">List View</string>
     <string name="map_view">Map View</string>
-    <string name="error">Error: %1$s</string>
+    <string name="error">Error</string>
     <string name="retry">Retry</string>
     <string name="no_routes_found_for">No routes found for \'%1$s\'</string>
     <string name="no_bus_routes_available">No bus routes available</string>
@@ -11,4 +11,6 @@
     <string name="arrival_time">Arrival Time: %1$s</string>
     <string name="plan_your_journey">Plan your journey</string>
     <string name="search_for_bus_stops_or_enter_locations">Search for bus stops\n</string>
+    <string name="connection_issue">Connection Issue</string>
+    <string name="journey_destination">Journey destination</string>
 </resources>

@@ -33,8 +33,8 @@ android {
 }
 
 dependencies {
-    implementation(project(":common"))
-    implementation(project(":core:common"))
+    implementation(project(":core:domain"))
+
     
     implementation(libs.androidx.core.ktx)
     
@@ -44,6 +44,10 @@ dependencies {
     api(libs.okhttp)
     api(libs.okhttp.logging.interceptor)
     api(libs.gson)
+    
+    // Dependency Injection
+    api(libs.koin.android)
+    api(libs.koin.core)
     
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
